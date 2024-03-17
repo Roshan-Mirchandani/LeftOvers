@@ -12,7 +12,6 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
-import RecipePageNavigator from "./RecipePageNavigator";
 
 function RecipeList({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
