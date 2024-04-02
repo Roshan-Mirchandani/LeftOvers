@@ -13,7 +13,10 @@ import {
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import RNPickerSelect from "react-native-picker-select";
-import { MultipleSelectList } from "react-native-dropdown-select-list";
+import {
+  MultipleSelectList,
+  SelectList,
+} from "react-native-dropdown-select-list";
 import firebase from "firebase/app";
 import "firebase/firestore";
 import db from "./database.js";
@@ -30,8 +33,12 @@ import {
   addDoc,
   deleteDoc,
 } from "firebase/firestore";
+import { getProfileData } from "react-native-calendars/src/Profiler.js";
 
-function HomeList(props) {
+function HomeList(route) {
+  //userID
+  const loggedInUserID = route.route.params.loggedInUserID;
+
   // Modal States
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
@@ -69,13 +76,13 @@ function HomeList(props) {
   const [editAddOptions, setEditAddOptions] = useState([]); //this and the one below for options available to pick
   const [editRemoveOptions, setEditRemoveOptions] = useState([]);
   const [editAddReady, setEditAddReady] = useState([]); //this and one below to set to use in function to send to database
-  const [editRemoveReady, setRemovetAddReady] = useState([]);
+  const [editRemoveReady, setEditRemoveReady] = useState([]);
 
   const fetchData = async () => {
     //called everytime the list needs to be rerendered in LIST VIEW
     try {
       const ucr = collection(db, "Users"); //ucr is User Collection Reference
-      const udr = doc(ucr, "1"); //udr is User Document Reference
+      const udr = doc(ucr, loggedInUserID); //udr is User Document Reference
       const ufcr = collection(udr, "UserFood"); // ufcr is User Food Collection Reference
       let querySnapshot = null;
       if (sortBy == "Alphabetical") {
@@ -100,7 +107,7 @@ function HomeList(props) {
   const fetchFolderData = async () => {
     try {
       const ucr = collection(db, "Users");
-      const udr = doc(ucr, "1");
+      const udr = doc(ucr, loggedInUserID);
       const ufscr = collection(udr, "FolderSystem");
       const querySnapshot = await getDocs(query(ufscr, orderBy("Name")));
       const fetchedDocuments = [];
@@ -157,7 +164,7 @@ function HomeList(props) {
         unit != null
       ) {
         const ucr = collection(db, "Users");
-        const udr = doc(ucr, "1");
+        const udr = doc(ucr, loggedInUserID);
         const ufcr = collection(udr, "UserFood");
         await addDoc(ufcr, {
           Date: expiryDate,
@@ -225,7 +232,7 @@ function HomeList(props) {
         updatedValues.Date = expiryDate;
       }
       const ucr = collection(db, "Users");
-      const udr = doc(ucr, "1");
+      const udr = doc(ucr, loggedInUserID);
       const ufcr = collection(udr, "UserFood");
       const ufdr = doc(ufcr, selectedRow);
       await setDoc(ufdr, updatedValues);
@@ -243,7 +250,7 @@ function HomeList(props) {
   const deleteItem = async () => {
     try {
       const ucr = collection(db, "Users");
-      const udr = doc(ucr, "1");
+      const udr = doc(ucr, loggedInUserID);
       const ufcr = collection(udr, "UserFood");
       const ufdr = doc(ufcr, selectedRow);
       await deleteDoc(ufdr);
@@ -266,7 +273,7 @@ function HomeList(props) {
     try {
       if (folderName != "") {
         const ucr = collection(db, "Users");
-        const udr = doc(ucr, "1");
+        const udr = doc(ucr, loggedInUserID);
         const ufscr = collection(udr, "FolderSystem");
         await addDoc(ufscr, {
           Name: folderName,
@@ -283,7 +290,7 @@ function HomeList(props) {
   const deleteFolder = async () => {
     try {
       const ucr = collection(db, "Users");
-      const udr = doc(ucr, "1");
+      const udr = doc(ucr, loggedInUserID);
       const ufscr = collection(udr, "FolderSystem");
       const ufsdr = doc(ufscr, selectedRow);
       await deleteDoc(ufsdr);
@@ -294,13 +301,14 @@ function HomeList(props) {
     setDelFolderModalVisible(false);
     fetchFolderData();
   };
-  const createOptionsAddForFolder = () => {
+  const createOptionsForAddFolder = () => {
     temp = [];
     for (var i = 0; i < documents.length; i++) {
       temp.push({ key: documents[i].id, value: documents[i].Name });
     }
     setOptionsForAdding(temp);
   };
+
   useEffect(() => {
     createOptionsForAddFolder();
   }, [addFolderModalVisible]);
@@ -309,41 +317,64 @@ function HomeList(props) {
   the second array that are options to remove from a folder*/
   const createOptionsForEditFolder = () => {
     let addArray = [];
-    for (var i = 0; i < documents.length; i++) {
-      let found = false;
-      for (var j = 0; j < docBeingEdited.Items.length; j++) {
-        if (documents[i].id == docBeingEdited.Items[j].id) {
-          found = true;
-          break;
+    if (documents != []) {
+      /* over here*/
+      for (var i = 0; i < documents.length; i++) {
+        let found = false;
+        for (var j = 0; j < docBeingEdited.Items.length; j++) {
+          if (documents[i].id == docBeingEdited.Items[j].id) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          addArray.push({ key: documents[i].id, value: documents[i].Name });
         }
       }
-      if (!found) {
-        addArray.push({ key: documents[i].id, value: documents[i].Name });
-      }
-    }
-    setEditAddOptions(addArray);
-    let removeArray = [];
-    for (const item1 of documents) {
-      for (const item2 of docBeingEdited.Items) {
-        if (item1.id == item2.id) {
-          removeArray.push({ key: item1.id, value: item1.Name });
-          break;
+      setEditAddOptions(addArray);
+      let removeArray = [];
+      for (const item1 of documents) {
+        for (const item2 of docBeingEdited.Items) {
+          if (item1.id == item2.id) {
+            removeArray.push({ key: item1.id, value: item1.Name });
+            break;
+          }
         }
       }
+      setEditRemoveOptions(removeArray);
     }
-    setEditRemoveOptions(removeArray);
   };
 
-  useEffect(() => {
+  /*useEffect(() => {
     createOptionsForEditFolder();
-  }, [editFolderModalVisible]);
+  }, [editFolderModalVisible]);*/
 
-  const editFolderAdd = () => {
-    // to do
-  };
-
-  const editFolderRemove = () => {
-    // to do
+  const editFolder = async (addArray, remArray) => {
+    const ucr = collection(db, "Users");
+    const udr = doc(ucr, loggedInUserID);
+    const ufscr = collection(udr, "FolderSystem");
+    const ufsdr = doc(ufscr, selectedRow);
+    const data = await getDoc(ufsdr);
+    current_array = data.data().Items;
+    folder_Name = data.data().Name;
+    console.log(current_array);
+    for (var j = 0; j < folderDocuments.length; j++) {
+      if (folderDocuments[j].id == selectedRow) {
+        console.log(1);
+        for (const item of addArray) {
+          if (!current_array.some((existingItem) => existingItem === item)) {
+            console.log(2);
+            current_array.push(item);
+          }
+        }
+        current_array = current_array.filter(
+          (item) => !remArray.some((removedItem) => removedItem === item)
+        );
+      }
+    }
+    await setDoc(ufsdr, { Name: folder_Name, Items: current_array });
+    setEditFolderModalVisible(false);
+    fetchFolderData();
   };
 
   {
@@ -537,17 +568,20 @@ function HomeList(props) {
             : null}
           <Text>Add</Text>
           <MultipleSelectList
-            setSelected={(key) => setAddToFolder(key)} // change function to do
+            setSelected={(key) => setEditAddReady(key)} // change function to do
             data={editAddOptions}
             save="key"
+            searchPlaceholder="Adding"
           />
           <Text>Remove</Text>
           <MultipleSelectList
-            setSelected={(key) => setAddToFolder(key)} // change function to do
+            setSelected={(key) => setEditRemoveReady(key)} // change function to do
             data={editRemoveOptions}
             save="key"
           />
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => editFolder(editAddReady, editRemoveReady)}
+          >
             <Text>Confirm Changes</Text>
           </TouchableOpacity>
         </View>
@@ -577,24 +611,29 @@ function HomeList(props) {
       </Modal>
       {/*------RENDER LIST----- */}
       <View style={styles.listContainer}>
-        <View>
-          <RNPickerSelect
-            onValueChange={(value) => setSortBy(value)}
-            placeholder={{ label: "Sort by:", value: "Alphabetical" }}
-            items={[
-              { label: "Alphabetical", value: "Alphabetical" },
-              { label: "Date", value: "Date" },
-            ]}
-          />
-          <RNPickerSelect
-            onValueChange={(value) => setListOrFolder(value)}
-            placeholder={{ label: "View:", value: "List" }}
-            items={[
-              { label: "List", value: "List" },
-              { label: "Folder", value: "Folder" },
-            ]}
-          />
-        </View>
+        <SelectList
+          setSelected={(val) => setListOrFolder(val)}
+          data={[
+            { key: "List", value: "List" },
+            { key: "Folder", value: "Folder" },
+          ]}
+          save="value"
+          search={false}
+        />
+        {listOrFolder == "List" ? (
+          <View>
+            <Text></Text>
+            <SelectList
+              setSelected={(value) => setSortBy(value)}
+              data={[
+                { key: "Alphabetical", value: "Alphabetical" },
+                { key: "Date", value: "Date" },
+              ]}
+              save="value"
+              seach={false}
+            />
+          </View>
+        ) : null}
 
         {
           //-----------List View
@@ -644,7 +683,7 @@ function HomeList(props) {
               : setAddFolderModalVisible(true)
           }
         >
-          <Text>Add</Text>
+          <Text style={styles.navBarButtons}>Add</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() =>
@@ -655,7 +694,7 @@ function HomeList(props) {
               : console.log("no row selected")
           }
         >
-          <Text>Edit</Text>
+          <Text style={styles.navBarButtons}>Edit</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() =>
@@ -666,29 +705,32 @@ function HomeList(props) {
               : console.log("no row selected")
           }
         >
-          <Text>Delete</Text>
+          <Text style={styles.navBarButtons}>Delete</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   wholeContainer: {
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     flex: 1,
+    backgroundColor: "#F9EDDD",
   },
   navBar: {
     flexDirection: "row",
     justifyContent: "space-evenly",
-    padding: 30,
-    paddingBottom: -10,
+    padding: 10,
+    paddingTop: 13,
+    borderRadius: 10,
     flex: 1,
-    borderColor: "pink",
-    borderWidth: 2,
+    borderColor: "#709976",
+    backgroundColor: "#445f48",
+    borderWidth: 3,
   },
   listContainer: {
-    borderColor: "red",
-    borderWidth: 2,
+    //borderColor: "red",
+    //borderWidth: 2,
     flex: 12,
     margin: 20,
   },
@@ -703,6 +745,41 @@ const styles = StyleSheet.create({
     marginRight: "3%",
     backgroundColor: "white",
   },
+  navBarButtons: {
+    color: "#F9EDDD",
+    fontSize: 24,
+  },
+  inputAndroid: {
+    width: "40%",
+    height: 100,
+    color: "purple",
+    borderWidth: 2,
+  },
 });
 
 export default HomeList;
+/*<View>
+          <View>
+            <RNPickerSelect
+              style={pickerSelectStyles}
+              onValueChange={(value) => setListOrFolder(value)}
+              placeholder={{ label: "View:", value: "List" }}
+              items={[
+                { label: "List", value: "List" },
+                { label: "Folder", value: "Folder" },
+              ]}
+            />
+          </View>
+          {listOrFolder == "List" ? (
+            <View>
+              <RNPickerSelect
+                onValueChange={(value) => setSortBy(value)}
+                placeholder={{ label: "Sort by:", value: "Alphabetical" }}
+                items={[
+                  { label: "Alphabetical", value: "Alphabetical" },
+                  { label: "Date", value: "Date" },
+                ]}
+              />
+            </View>
+          ) : null}
+        </View> */

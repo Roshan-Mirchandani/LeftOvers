@@ -55,7 +55,7 @@ function RecipeList({ navigation }) {
         >
           <Image source={{ uri: item.recipe.image }} style={styles.images} />
         </TouchableOpacity>
-        <Text>{item.recipe.label}</Text>
+        <Text style={styles.boxText}>{item.recipe.label}</Text>
       </View>
     );
   };
@@ -131,12 +131,15 @@ function RecipeList({ navigation }) {
 
   //RENDERS EVERYTHING
   return (
-    <SafeAreaView style={styles.wholeContainer}>
+    <View style={styles.wholeContainer}>
       {isSearching == false ? (
-        <View>
+        <View style={styles.searchContainer}>
+          <Text style={styles.text}>
+            Input just ingredient names with spaces in between thanks!
+          </Text>
           <TextInput
             style={styles.centreSearch}
-            placeholder="Input just ingredient names with spaces in between thanks!"
+            placeholder="..."
             onChangeText={setTextInputValue}
             value={textInputValue}
             onSubmitEditing={handleSearch}
@@ -148,12 +151,12 @@ function RecipeList({ navigation }) {
         <View style={styles.resultContainer}>
           <View>
             <TextInput
-              placeholder="Input just ingredient names with spaces in between thanks!"
+              style={styles.topSearch}
               onChangeText={setTextInputValue}
               value={textInputValue}
               onSubmitEditing={handleSearch}
             />
-            <Text>FILTERS</Text>
+            <Text></Text>
           </View>
           <View style={styles.listContainer}>
             <FlatList
@@ -163,53 +166,97 @@ function RecipeList({ navigation }) {
             />
             <View style={styles.button}>
               <TouchableOpacity onPress={nextPage}>
-                <Text>More Ingredients</Text>
+                <Text style={styles.buttonText}>More Recipes</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   box1: {
-    width: "50%",
-    height: 200,
-    backgroundColor: "pink",
+    width: "48%",
+    height: 220,
+    borderWidth: 3,
+    borderColor: "#445F48",
+    borderRadius: 10,
+    margin: "1%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#729B79",
+  },
+  boxText: {
+    color: "#F5E2C8",
+    fontSize: 14,
   },
   images: {
     width: 150,
     height: 150,
-  },
-  centreSearch: {
-    marginTop: "30%",
-    borderColor: "red",
+    borderRadius: 10,
+    borderColor: "#F5E2C8",
     borderWidth: 3,
   },
+  centreSearch: {
+    marginBottom: "40%",
+    borderColor: "#729B79",
+    height: 50,
+    width: "95%",
+    borderWidth: 3,
+    fontSize: 20,
+    color: "#729B79",
+    borderRadius: 10,
+    padding: 10,
+  },
+  topSearch: {
+    borderColor: "#729B79",
+    height: 50,
+    width: "100%",
+    borderWidth: 3,
+    fontSize: 20,
+    color: "#729B79",
+    borderRadius: 10,
+    alignItems: "center",
+    padding: 10,
+  },
   button: {
-    backgroundColor: "red",
-    height: 100,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    backgroundColor: "#445F48",
+    borderColor: "#4F404C",
+    borderWidth: 3,
+    height: 50,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: 30,
+    color: "#F5E2C8",
   },
   listContainer: {
     marginBottom: 90,
+    justifyContent: "space-evenly",
   },
   resultContainer: {
     flex: 1,
   },
-  wholeContainer: {
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  searchContainer: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: {
+    color: "#729B79",
+    fontSize: 24,
+    marginHorizontal: "3%",
+  },
+  wholeContainer: {
+    flex: 1,
+    backgroundColor: "#F5E2C8",
   },
   next: { right: 10 },
 });
 export default RecipeList;
-
-/* data.hits[1].recipe.dishType 
-
-console.log(data._links.next.href);
-
-*/
