@@ -10,7 +10,14 @@ function InventoryManager(route) {
   const loggedInUserID = route.route.params.loggedInUserID;
   return (
     <SafeAreaView style={styles.wholeContainer}>
-      <Tab.Navigator>
+      <Tab.Navigator
+        screenOptions={{
+          tabBarStyle: { backgroundColor: "#709976" },
+          tabBarIndicatorStyle: { backgroundColor: "#445f48" },
+          tabBarActiveTintColor: "#F9EDDD",
+          tabBarInactiveTintColor: "#F9EDDD",
+        }}
+      >
         <Tab.Screen
           name="Home"
           component={HomeList}
@@ -28,7 +35,6 @@ function InventoryManager(route) {
 
 const styles = StyleSheet.create({
   wholeContainer: {
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     flex: 1,
   },
 });

@@ -167,7 +167,7 @@ function ShoppingList(route) {
   };
 
   return (
-    <SafeAreaView style={styles.wholeContainer}>
+    <View style={styles.wholeContainer}>
       {/*-------------ADD MODAL--------------*/}
       <Modal
         animationType="slide"
@@ -177,14 +177,16 @@ function ShoppingList(route) {
           setAddModalVisible(!addModalVisible);
         }}
       >
-        <View style={styles.addItem}>
-          <Text>Add:</Text>
+        <View style={styles.modal}>
+          <Text style={[styles.modalText, { paddingTop: 50 }]}>Add:</Text>
           <TextInput
             onChangeText={setAddShoppingItem}
             value={addShoppingItem}
+            style={styles.modalTextInput}
           ></TextInput>
+          <Text></Text>
           <TouchableOpacity onPress={() => addToList()}>
-            <Text>Confirm</Text>
+            <Text style={styles.modalButton}>Confirm</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -197,11 +199,15 @@ function ShoppingList(route) {
           setDelModalVisible(!delModalVisible);
         }}
       >
-        <View style={styles.addItem}>
-          <Text>Are you sure you want to delete the following record?</Text>
-          <Text>{docBeingEdited.Name}</Text>
+        <View style={styles.modal}>
+          <Text style={[styles.modalText, { paddingTop: 50 }]}>
+            Are you sure you want to delete the following record?
+          </Text>
+          <Text></Text>
+          <Text style={styles.modalText}>{docBeingEdited.Name}</Text>
+          <Text></Text>
           <TouchableOpacity onPress={() => deleteItem()}>
-            <Text>PRESS TO CONFIRM</Text>
+            <Text style={styles.modalButton}>PRESS TO CONFIRM</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -214,23 +220,32 @@ function ShoppingList(route) {
           setBoughtModalVisible(!boughtModalVisible);
         }}
       >
-        <View style={styles.addItem}>
-          <Text>Name</Text>
+        <View style={styles.modal}>
+          <Text style={styles.modalText}>Name</Text>
           <TextInput
             onChangeText={setAddItemText}
             value={addItemText}
             placeholder={docBeingEdited.Name}
+            placeholderTextColor={"#F6E3CB"}
+            style={styles.modalTextInput}
           />
-          <Text>Quantity</Text>
+          <Text style={styles.modalText}>Quantity</Text>
           <TextInput
             onChangeText={setAddItemQuantity}
             value={addItemQuantity}
+            placeholderTextColor={"#F6E3CB"}
+            style={styles.modalTextInput}
           />
-          <Text>Unit</Text>
-          <TextInput onChangeText={setUnit} value={unit} />
-          <Text>Expiry Date:</Text>
+          <Text style={styles.modalText}>Unit</Text>
+          <TextInput
+            onChangeText={setUnit}
+            value={unit}
+            placeholderTextColor={"#F6E3CB"}
+            style={styles.modalTextInput}
+          />
+          <Text style={styles.modalText}>Expiry Date:</Text>
           <TouchableOpacity onPress={() => setCalendarVisible(true)}>
-            <Text>
+            <Text style={styles.modalText}>
               {expiryDate === "" ? "DD-MM-YYYY" : formatDate(expiryDate)}
             </Text>
           </TouchableOpacity>
@@ -240,7 +255,7 @@ function ShoppingList(route) {
               setCalendarVisible(!calendarVisible);
             }}
           >
-            <View style={styles.addItem}>
+            <View style={styles.calendarModal}>
               <Calendar
                 onDayPress={(day) => {
                   setExpiryDate(day.dateString);
@@ -250,63 +265,123 @@ function ShoppingList(route) {
             </View>
           </Modal>
           <TouchableOpacity onPress={() => transferToHomeList()}>
-            <Text>Add Item</Text>
+            <Text style={styles.modalButton}>Add Item</Text>
           </TouchableOpacity>
         </View>
       </Modal>
       {/*----------------------------------------------*/}
       <View style={styles.listContainer}>
-        {documents.map((document) => (
-          <View key={document.id}>
-            <TouchableOpacity onPress={() => setSelectedRow(document.id)}>
-              <Text>{document.Name}</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+        <View style={styles.list}>
+          {documents.map((document) => (
+            <View key={document.id}>
+              <TouchableOpacity onPress={() => setSelectedRow(document.id)}>
+                <Text
+                  style={[
+                    styles.listText1,
+                    selectedRow === document.id && styles.selectedRow,
+                  ]}
+                >
+                  {document.Name}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
       </View>
       <View style={styles.navBar}>
         <TouchableOpacity onPress={() => setAddModalVisible(true)}>
-          <Text>Add</Text>
+          <Text style={styles.navBarButtons}>Add</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setBoughtModalVisible(true)}>
-          <Text>Bought</Text>
+          <Text style={styles.navBarButtons}>Bought</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setDelModalVisible(true)}>
-          <Text>Delete</Text>
+          <Text style={styles.navBarButtons}>Delete</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 const styles = StyleSheet.create({
   wholeContainer: {
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     flex: 1,
+    backgroundColor: "#F5E2C8",
   },
   navBar: {
     flexDirection: "row",
     justifyContent: "space-evenly",
-    padding: 30,
-    paddingBottom: -10,
+    padding: 10,
+    paddingTop: 13,
+    borderRadius: 10,
     flex: 1,
-    borderColor: "pink",
-    borderWidth: 2,
+    borderColor: "#709976",
+    backgroundColor: "#445f48",
+    borderWidth: 3,
   },
   listContainer: {
-    borderColor: "red",
-    borderWidth: 2,
     flex: 12,
     margin: 20,
   },
-  addItem: {
-    height: 100,
+
+  modal: {
+    height: 300,
     width: "94%",
-    borderColor: "orange",
-    borderWidth: 3,
-    marginTop: "45%",
+    marginTop: "25%",
     marginLeft: "3%",
     marginRight: "3%",
-    backgroundColor: "white",
+    backgroundColor: "#709976",
+    borderRadius: 10,
+  },
+  modalText: {
+    fontSize: 20,
+    color: "#F6E3CB",
+    paddingLeft: 10,
+  },
+  modalTextInput: {
+    fontSize: 20,
+    color: "#F6E3CB",
+    paddingLeft: 10,
+    borderWidth: 2,
+    borderColor: "#F6E3CB",
+    marginHorizontal: 10,
+  },
+  modalButton: {
+    justifyContent: "center",
+    alignSelf: "center",
+    fontSize: 20,
+    color: "#F6E3CB",
+    backgroundColor: "#445f48",
+    borderRadius: 10,
+    padding: 8,
+  },
+  calendarModal: {
+    height: 300,
+    width: "94%",
+    marginTop: "25%",
+    marginLeft: "3%",
+    marginRight: "3%",
+  },
+  navBarButtons: {
+    color: "#F9EDDD",
+    fontSize: 24,
+  },
+  list: {
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: "#445f48",
+    padding: 10,
+    flex: 1,
+    backgroundColor: "#F9EDDD",
+  },
+  listText1: {
+    fontSize: 18,
+    color: "#445f48",
+    alignSelf: "center",
+  },
+
+  selectedRow: {
+    fontSize: 20,
+    fontWeight: "bold",
   },
 });
 

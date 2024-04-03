@@ -51,6 +51,8 @@ function WelcomePage(props) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [loggedInUserID, setLoggedInUserID] = useState("");
 
+  //for call back function
+
   const registerUser = async () => {
     setAlreadyRegisteredMessage(false);
     setFillInBlanksMessage(false);
@@ -104,11 +106,13 @@ function WelcomePage(props) {
       console.log("Error logging in this user ", error);
     }
   };
-
+  const logOutUser = (boolean) => {
+    setLoggedIn(boolean);
+  };
   return (
     <SafeAreaView style={styles.wholeContainer}>
       {loggedIn == true ? (
-        <Buttons loggedInUserID={loggedInUserID} />
+        <Buttons loggedInUserID={loggedInUserID} logOutUser={logOutUser} />
       ) : (
         <View style={styles.screenContainer}>
           <Modal

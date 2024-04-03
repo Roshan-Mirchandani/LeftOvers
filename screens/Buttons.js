@@ -9,7 +9,7 @@ import Settings from "./Settings";
 
 const Tab = createBottomTabNavigator();
 
-function Buttons({ loggedInUserID }) {
+function Buttons({ loggedInUserID, logOutUser }) {
   return (
     <View style={styles.button_container}>
       <Tab.Navigator
@@ -58,7 +58,10 @@ function Buttons({ loggedInUserID }) {
           name="Settings"
           component={Settings}
           options={{ headerShown: false }}
-          initialParams={{ loggedInUserID: loggedInUserID }}
+          initialParams={{
+            loggedInUserID: loggedInUserID,
+            logOutUser: logOutUser,
+          }}
         />
       </Tab.Navigator>
     </View>

@@ -33,7 +33,6 @@ import {
   addDoc,
   deleteDoc,
 } from "firebase/firestore";
-import { getProfileData } from "react-native-calendars/src/Profiler.js";
 
 function HomeList(route) {
   //userID
@@ -309,9 +308,9 @@ function HomeList(route) {
     setOptionsForAdding(temp);
   };
 
-  useEffect(() => {
+  /*useEffect(() => {
     createOptionsForAddFolder();
-  }, [addFolderModalVisible]);
+  }, [addFolderModalVisible]);*/
 
   /*makes 2 arrays, one array which are all the options to add in a folder that arent already in,
   the second array that are options to remove from a folder*/
@@ -345,9 +344,9 @@ function HomeList(route) {
     }
   };
 
-  /*useEffect(() => {
+  useEffect(() => {
     createOptionsForEditFolder();
-  }, [editFolderModalVisible]);*/
+  }, [editFolderModalVisible]);
 
   const editFolder = async (addArray, remArray) => {
     const ucr = collection(db, "Users");
@@ -377,6 +376,11 @@ function HomeList(route) {
     fetchFolderData();
   };
 
+  const isDatePassed = (date) => {
+    const currentDate = new Date();
+    const rowDate = new Date(date);
+    return rowDate < currentDate;
+  };
   {
     /*-----------------------returns--------------------------- */
   }
@@ -391,19 +395,28 @@ function HomeList(route) {
           setAddModalVisible(!addModalVisible);
         }}
       >
-        <View style={styles.addItem}>
-          <Text>Name</Text>
-          <TextInput onChangeText={setAddItemText} value={addItemText} />
-          <Text>Quantity</Text>
+        <View style={styles.modal}>
+          <Text style={styles.modalText}>Name</Text>
+          <TextInput
+            onChangeText={setAddItemText}
+            value={addItemText}
+            style={styles.modalTextInput}
+          />
+          <Text style={styles.modalText}>Quantity</Text>
           <TextInput
             onChangeText={setAddItemQuantity}
             value={addItemQuantity}
+            style={styles.modalTextInput}
           />
-          <Text>Unit</Text>
-          <TextInput onChangeText={setUnit} value={unit} />
-          <Text>Expiry Date:</Text>
+          <Text style={styles.modalText}>Unit</Text>
+          <TextInput
+            onChangeText={setUnit}
+            value={unit}
+            style={styles.modalTextInput}
+          />
+          <Text style={styles.modalText}>Expiry Date:</Text>
           <TouchableOpacity onPress={() => setCalendarVisible(true)}>
-            <Text>
+            <Text style={styles.modalText}>
               {expiryDate === "" ? "DD-MM-YYYY" : formatDate(expiryDate)}
             </Text>
           </TouchableOpacity>
@@ -413,7 +426,7 @@ function HomeList(route) {
               setCalendarVisible(!calendarVisible);
             }}
           >
-            <View style={styles.addItem}>
+            <View style={styles.calendarModal}>
               <Calendar
                 onDayPress={(day) => {
                   setExpiryDate(day.dateString);
@@ -423,7 +436,7 @@ function HomeList(route) {
             </View>
           </Modal>
           <TouchableOpacity onPress={() => addItemtoDatabase()}>
-            <Text>Add Item</Text>
+            <Text style={styles.modalButton}>Add Item</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -440,37 +453,42 @@ function HomeList(route) {
           setEditModalVisible(!editModalVisible);
         }}
       >
-        <View style={styles.addItem}>
-          <Text>Name</Text>
+        <View style={styles.modal}>
+          <Text style={styles.modalText}>Name</Text>
           <TextInput
             onChangeText={setAddItemText}
             value={addItemText}
             placeholder={docBeingEdited.Name}
+            placeholderTextColor={"#F6E3CB"}
+            style={styles.modalTextInput}
           />
 
-          <Text>Quantity</Text>
+          <Text style={styles.modalText}>Quantity</Text>
           <TextInput
             onChangeText={setAddItemQuantity}
             value={addItemQuantity}
             placeholder={docBeingEdited.Quantity}
+            placeholderTextColor={"#F6E3CB"}
+            style={styles.modalTextInput}
           />
 
-          <Text>Unit</Text>
+          <Text style={styles.modalText}>Unit</Text>
           <TextInput
             onChangeText={setUnit}
             value={unit}
             placeholder={docBeingEdited.Unit}
+            placeholderTextColor={"#F6E3CB"}
+            style={styles.modalTextInput}
           />
 
-          <Text>Expiry Date:</Text>
+          <Text style={styles.modalText}>Expiry Date:</Text>
           <TouchableOpacity onPress={() => setCalendarVisible(true)}>
-            <Text>
+            <Text style={styles.modalText}>
               {expiryDate != ""
                 ? formatDate(expiryDate)
                 : docBeingEdited != []
                 ? formatDate(docBeingEdited.Date)
                 : null}
-              ;
             </Text>
           </TouchableOpacity>
 
@@ -480,7 +498,7 @@ function HomeList(route) {
               setCalendarVisible(!calendarVisible);
             }}
           >
-            <View style={styles.addItem}>
+            <View style={styles.calendarModal}>
               <Calendar
                 onDayPress={(day) => {
                   setExpiryDate(day.dateString);
@@ -490,7 +508,7 @@ function HomeList(route) {
             </View>
           </Modal>
           <TouchableOpacity onPress={() => editItem()}>
-            <Text>Change Item</Text>
+            <Text style={styles.modalButton}>Change Item</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -503,16 +521,20 @@ function HomeList(route) {
           setDelModalVisible(!delModalVisible);
         }}
       >
-        <View style={styles.addItem}>
-          <Text>Are you sure you want to delete the following record?</Text>
-          <Text>{docBeingEdited.Name}</Text>
-          <Text>
+        <View style={styles.modal}>
+          <Text style={[styles.modalText, { paddingTop: 50 }]}>
+            Are you sure you want to delete the following record?
+          </Text>
+          <Text></Text>
+          <Text style={styles.modalText}>{docBeingEdited.Name}</Text>
+          <Text style={styles.modalText}>
             {docBeingEdited.Quantity}
             {docBeingEdited.Unit}
           </Text>
-          <Text>{docBeingEdited.Date}</Text>
+          <Text style={styles.modalText}>{docBeingEdited.Date}</Text>
+          <Text></Text>
           <TouchableOpacity onPress={() => deleteItem()}>
-            <Text>PRESS TO CONFIRM</Text>
+            <Text style={styles.modalButton}>PRESS TO CONFIRM</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -525,20 +547,26 @@ function HomeList(route) {
           setAddFolderModalVisible(!addFolderModalVisible);
         }}
       >
-        <View style={styles.addItem}>
-          <Text>Name of Folder:</Text>
+        <View style={[styles.modal, { height: 500 }]}>
+          <Text style={styles.modalText}>Name of Folder:</Text>
           <TextInput
             onChangeText={setFolderName}
             value={folderName}
+            style={styles.modalTextInput}
           ></TextInput>
-          <Text>Add Food from Stock</Text>
+          <Text style={styles.modalText}>Add Food from Stock</Text>
           <MultipleSelectList
             setSelected={(key) => setAddToFolder(key)}
             data={optionsForAdding}
             save="key"
+            boxStyles={styles.boxStyles}
+            inputStyles={styles.inputStyles}
+            dropdownStyles={styles.dropdownStyles}
+            dropdownItemStyles={styles.dropdownItemStyles}
+            dropdownTextStyles={styles.dropdownTextStyles}
           />
           <TouchableOpacity onPress={() => addFolder(addToFolder)}>
-            <Text>Create Folder</Text>
+            <Text style={styles.modalButton}>Create Folder</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -551,38 +579,55 @@ function HomeList(route) {
           setEditFolderModalVisible(!editFolderModalVisible);
         }}
       >
-        <View style={styles.addItem}>
-          <Text>Name</Text>
+        <View style={[styles.modal, { height: 500 }]}>
+          <Text style={styles.modalText}>Name</Text>
           <TextInput
             onChangeText={setFolderName}
             value={folderName}
             placeholder={docBeingEdited.Name}
+            placeholderTextColor={"#F6E3CB"}
+            style={styles.modalTextInput}
           />
-          <Text>Current Items in folder:</Text>
-          {docBeingEdited.Items != null
-            ? docBeingEdited.Items.map((item, index) => (
-                <View key={index}>
-                  <Text>{item.Name}</Text>
-                </View>
-              ))
-            : null}
-          <Text>Add</Text>
+          <Text style={styles.modalText}>Current Items in folder:</Text>
+          <View style={{ flexDirection: "row" }}>
+            {docBeingEdited.Items != null
+              ? docBeingEdited.Items.map((item, index) => (
+                  <View key={index}>
+                    <Text style={[styles.modalText, { fontSize: 16 }]}>
+                      {item.Name}
+                    </Text>
+                  </View>
+                ))
+              : null}
+          </View>
+          <Text style={styles.modalText}>Add</Text>
           <MultipleSelectList
-            setSelected={(key) => setEditAddReady(key)} // change function to do
+            setSelected={(key) => setEditAddReady(key)}
             data={editAddOptions}
             save="key"
             searchPlaceholder="Adding"
+            boxStyles={styles.boxStyles}
+            inputStyles={styles.inputStyles}
+            dropdownStyles={[styles.dropdownStyles, { height: 200 }]}
+            dropdownItemStyles={styles.dropdownItemStyles}
+            dropdownTextStyles={styles.dropdownTextStyles}
           />
-          <Text>Remove</Text>
+          <Text style={styles.modalText}>Remove</Text>
           <MultipleSelectList
-            setSelected={(key) => setEditRemoveReady(key)} // change function to do
+            setSelected={(key) => setEditRemoveReady(key)}
             data={editRemoveOptions}
             save="key"
+            searchPlaceholder="Removing"
+            boxStyles={styles.boxStyles}
+            inputStyles={styles.inputStyles}
+            dropdownStyles={[styles.dropdownStyles, { height: 150 }]}
+            dropdownItemStyles={styles.dropdownItemStyles}
+            dropdownTextStyles={styles.dropdownTextStyles}
           />
           <TouchableOpacity
             onPress={() => editFolder(editAddReady, editRemoveReady)}
           >
-            <Text>Confirm Changes</Text>
+            <Text style={styles.modalButton}>Confirm Changes</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -596,84 +641,132 @@ function HomeList(route) {
           setDelFolderModalVisible(!delFolderModalVisible);
         }}
       >
-        <View style={styles.addItem}>
-          <Text>
+        <View style={styles.modal}>
+          <Text style={[styles.modalText, { paddingTop: 50 }]}>
             Are you sure you want to delete the following Folder and all its
             content?
           </Text>
-          <Text>{docBeingEdited.Name}</Text>
-          <Text>(ITEMS IF YOU CAN BE ASKED)</Text>
-
+          <Text></Text>
+          <Text style={styles.modalText}>{docBeingEdited.Name}</Text>
+          <View style={{ flexDirection: "row" }}>
+            {docBeingEdited.Items != null
+              ? docBeingEdited.Items.map((item, index) => (
+                  <View key={index}>
+                    <Text style={[styles.modalText, { fontSize: 16 }]}>
+                      {item.Name}
+                    </Text>
+                  </View>
+                ))
+              : null}
+          </View>
+          <Text></Text>
           <TouchableOpacity onPress={() => deleteFolder()}>
-            <Text>PRESS TO CONFIRM</Text>
+            <Text style={styles.modalButton}>PRESS TO CONFIRM</Text>
           </TouchableOpacity>
         </View>
       </Modal>
       {/*------RENDER LIST----- */}
       <View style={styles.listContainer}>
-        <SelectList
-          setSelected={(val) => setListOrFolder(val)}
-          data={[
-            { key: "List", value: "List" },
-            { key: "Folder", value: "Folder" },
-          ]}
-          save="value"
-          search={false}
-        />
-        {listOrFolder == "List" ? (
-          <View>
-            <Text></Text>
+        <View style={{ flexDirection: "row", paddingRight: 8 }}>
+          <View style={{ flex: 1 }}>
             <SelectList
-              setSelected={(value) => setSortBy(value)}
+              setSelected={(val) => setListOrFolder(val)}
               data={[
-                { key: "Alphabetical", value: "Alphabetical" },
-                { key: "Date", value: "Date" },
+                { key: "List", value: "List" },
+                { key: "Folder", value: "Folder" },
               ]}
               save="value"
-              seach={false}
+              search={false}
+              defaultOption={{ key: "List", value: "List" }}
             />
           </View>
-        ) : null}
-
-        {
-          //-----------List View
-          listOrFolder == "List"
-            ? documents.map((document) => (
-                <View key={document.id}>
-                  <TouchableOpacity onPress={() => setSelectedRow(document.id)}>
-                    <Text>
-                      {document.Name} {document.Quantity}
-                      {document.Unit !== "-" ? document.Unit : ""}:
-                      {formatDate(document.Date)}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ))
-            : //------------Folder View
-              folderDocuments.map((document, index) => (
-                <View key={folderDocuments.id}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      changeOpenStateOfFolder(index),
-                        setSelectedRow(folderDocuments[index].id);
-                    }}
-                  >
-                    <Text>{document.Name}</Text>
-                  </TouchableOpacity>
-                  {document.Items != null && openCloseFolder[index] == true
-                    ? document.Items.map((item, index2) => (
-                        <View key={index2}>
-                          <Text>
-                            {item.Name} {item.Quantity}
-                            {item.Unit !== "-" ? item.Unit : ""}:
-                            {formatDate(item.Date)}{" "}
-                          </Text>
-                        </View>
-                      ))
-                    : null}
-                </View>
-              ))
-        }
+          {listOrFolder == "List" ? (
+            <View style={{ flex: 1, paddingLeft: 8 }}>
+              <SelectList
+                setSelected={(value) => setSortBy(value)}
+                data={[
+                  { key: "Alphabetical", value: "Alphabetical" },
+                  { key: "Date", value: "Date" },
+                ]}
+                save="value"
+                search={false}
+                defaultOption={{ key: "Alphabetical", value: "Alphabetical" }}
+              />
+            </View>
+          ) : null}
+        </View>
+        <Text></Text>
+        <Text></Text>
+        <ScrollView style={styles.list}>
+          {
+            //-----------List View
+            listOrFolder == "List"
+              ? documents.map((document) => (
+                  <View key={document.id}>
+                    <TouchableOpacity
+                      onPress={() => setSelectedRow(document.id)}
+                    >
+                      <View style={{ flexDirection: "row" }}>
+                        <Text
+                          style={[
+                            styles.listText1,
+                            isDatePassed(document.Date) && styles.expiredText,
+                            selectedRow === document.id && styles.selectedRow,
+                          ]}
+                        >
+                          {document.Name} {document.Quantity}
+                          {document.Unit !== "-" ? document.Unit : ""}:
+                        </Text>
+                        <Text style={styles.listText2}>
+                          {formatDate(document.Date)}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              : //------------Folder View
+                folderDocuments.map((document, index) => (
+                  <View key={folderDocuments.id}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        changeOpenStateOfFolder(index),
+                          setSelectedRow(folderDocuments[index].id);
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.folderTitle,
+                          selectedRow === document.id && styles.selectedRow,
+                        ]}
+                      >
+                        {document.Name}
+                      </Text>
+                    </TouchableOpacity>
+                    {document.Items != null && openCloseFolder[index] == true
+                      ? document.Items.map((item, index2) => (
+                          <View key={index2} style={{ flexDirection: "row" }}>
+                            <Text
+                              style={[
+                                [styles.listText1, { paddingLeft: 15 }],
+                                isDatePassed(item.Date) && [
+                                  styles.expiredText,
+                                  { paddingLeft: 15 },
+                                ],
+                              ]}
+                            >
+                              {item.Name} {item.Quantity}
+                              {item.Unit !== "-" ? item.Unit : ""}:
+                            </Text>
+                            <Text style={styles.listText2}>
+                              {formatDate(item.Date)}{" "}
+                            </Text>
+                          </View>
+                        ))
+                      : null}
+                  </View>
+                ))
+          }
+        </ScrollView>
       </View>
       <View style={styles.navBar}>
         <TouchableOpacity
@@ -715,7 +808,7 @@ function HomeList(route) {
 const styles = StyleSheet.create({
   wholeContainer: {
     flex: 1,
-    backgroundColor: "#F9EDDD",
+    backgroundColor: "#F5E2C8",
   },
   navBar: {
     flexDirection: "row",
@@ -729,57 +822,106 @@ const styles = StyleSheet.create({
     borderWidth: 3,
   },
   listContainer: {
-    //borderColor: "red",
-    //borderWidth: 2,
     flex: 12,
     margin: 20,
   },
 
-  addItem: {
+  modal: {
     height: 300,
     width: "94%",
-    borderColor: "orange",
-    borderWidth: 3,
     marginTop: "25%",
     marginLeft: "3%",
     marginRight: "3%",
-    backgroundColor: "white",
+    backgroundColor: "#709976",
+    borderRadius: 10,
+  },
+  modalText: {
+    fontSize: 20,
+    color: "#F6E3CB",
+    paddingLeft: 10,
+  },
+  modalTextInput: {
+    fontSize: 20,
+    color: "#F6E3CB",
+    paddingLeft: 10,
+    borderWidth: 2,
+    borderColor: "#F6E3CB",
+    marginHorizontal: 10,
+  },
+  modalButton: {
+    justifyContent: "center",
+    alignSelf: "center",
+    fontSize: 20,
+    color: "#F6E3CB",
+    backgroundColor: "#445f48",
+    borderRadius: 10,
+    padding: 8,
+  },
+  calendarModal: {
+    height: 300,
+    width: "94%",
+    marginTop: "25%",
+    marginLeft: "3%",
+    marginRight: "3%",
   },
   navBarButtons: {
     color: "#F9EDDD",
     fontSize: 24,
   },
-  inputAndroid: {
-    width: "40%",
-    height: 100,
-    color: "purple",
+  list: {
     borderWidth: 2,
+    borderRadius: 10,
+    borderColor: "#445f48",
+    padding: 10,
+    flex: 1,
+    backgroundColor: "#F9EDDD",
+  },
+  listText1: {
+    fontSize: 18,
+    color: "#445f48",
+  },
+  listText2: {
+    fontSize: 18,
+    color: "#4F404C",
+    fontWeight: "700",
+  },
+  expiredText: {
+    fontSize: 18,
+    color: "red",
+    textDecorationLine: "line-through",
+  },
+  selectedRow: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  folderTitle: {
+    fontSize: 20,
+    color: "#4F404C",
+    textDecorationLine: "underline",
+  },
+  boxStyles: {
+    marginHorizontal: 10,
+    borderColor: "#F6E3CB",
+    color: "#F6E3CB",
+  },
+  inputStyles: {
+    borderColor: "#F6E3CB",
+    color: "#F6E3CB",
+  },
+
+  dropdownStyles: {
+    height: 350,
+    marginHorizontal: 10,
+    color: "#F6E3CB",
+    borderColor: "#F6E3CB",
+  },
+  dropdownItemStyles: {
+    color: "#F6E3CB",
+  },
+
+  dropdownTextStyles: {
+    color: "#F6E3CB",
   },
 });
 
 export default HomeList;
-/*<View>
-          <View>
-            <RNPickerSelect
-              style={pickerSelectStyles}
-              onValueChange={(value) => setListOrFolder(value)}
-              placeholder={{ label: "View:", value: "List" }}
-              items={[
-                { label: "List", value: "List" },
-                { label: "Folder", value: "Folder" },
-              ]}
-            />
-          </View>
-          {listOrFolder == "List" ? (
-            <View>
-              <RNPickerSelect
-                onValueChange={(value) => setSortBy(value)}
-                placeholder={{ label: "Sort by:", value: "Alphabetical" }}
-                items={[
-                  { label: "Alphabetical", value: "Alphabetical" },
-                  { label: "Date", value: "Date" },
-                ]}
-              />
-            </View>
-          ) : null}
-        </View> */
