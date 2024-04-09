@@ -6,6 +6,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import InventoryManager from "./InventoryManager";
 import RecipeGenerator from "./RecipeGenerator";
 import Settings from "./Settings";
+import RecipePageNavigator from "./RecipePageNavigator";
 
 const Tab = createBottomTabNavigator();
 
@@ -21,7 +22,7 @@ function Buttons({ loggedInUserID, logOutUser }) {
           tabBarInactiveTintColor: "#F9EDDD",
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
-            if (route.name === "Recipe Generator") {
+            if (route.name === "Recipe Page Navigator") {
               iconName = focused
                 ? require("../assets/icons/loupe.png")
                 : require("../assets/icons/loupe.png");
@@ -41,8 +42,8 @@ function Buttons({ loggedInUserID, logOutUser }) {
         })}
       >
         <Tab.Screen
-          name="Recipe Generator"
-          component={RecipeGenerator}
+          name="Recipe Page Navigator"
+          component={RecipePageNavigator}
           options={{ headerShown: false }}
           initialParams={{ loggedInUserID: loggedInUserID }}
         />

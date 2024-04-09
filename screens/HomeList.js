@@ -308,9 +308,9 @@ function HomeList(route) {
     setOptionsForAdding(temp);
   };
 
-  /*useEffect(() => {
+  useEffect(() => {
     createOptionsForAddFolder();
-  }, [addFolderModalVisible]);*/
+  }, [addFolderModalVisible]);
 
   /*makes 2 arrays, one array which are all the options to add in a folder that arent already in,
   the second array that are options to remove from a folder*/
@@ -727,21 +727,42 @@ function HomeList(route) {
               : //------------Folder View
                 folderDocuments.map((document, index) => (
                   <View key={folderDocuments.id}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        changeOpenStateOfFolder(index),
-                          setSelectedRow(folderDocuments[index].id);
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
                       }}
                     >
-                      <Text
-                        style={[
-                          styles.folderTitle,
-                          selectedRow === document.id && styles.selectedRow,
-                        ]}
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedRow(folderDocuments[index].id);
+                        }}
                       >
-                        {document.Name}
-                      </Text>
-                    </TouchableOpacity>
+                        <Text
+                          style={[
+                            styles.folderTitle,
+                            selectedRow === document.id && styles.selectedRow,
+                          ]}
+                        >
+                          {document.Name}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          changeOpenStateOfFolder(index);
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.folderTitle,
+                            selectedRow === document.id && styles.selectedRow,
+                            { textDecorationLine: "none" },
+                          ]}
+                        >
+                          ˅
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                     {document.Items != null && openCloseFolder[index] == true
                       ? document.Items.map((item, index2) => (
                           <View key={index2} style={{ flexDirection: "row" }}>

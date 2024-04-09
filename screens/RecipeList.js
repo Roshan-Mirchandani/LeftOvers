@@ -71,7 +71,6 @@ function RecipeList({ navigation }) {
   }, [queryText, currentPage]);
 
   const fetchData = async () => {
-    console.log("fetch 1");
     const apiKey = "ace5596b42954a08f5296bb23f3d4ca9";
     const apiAppID = "903207ca";
     const query = queryText;
@@ -83,20 +82,20 @@ function RecipeList({ navigation }) {
       const jsonData = await response.json();
 
       if (currentSearch == queryText) {
-        console.log("no diff");
+        //i.e if the user still hasnt changed the search input
         if (currentPage == 1) {
-          setRecipeArray(jsonData.hits);
+          setRecipeArray(jsonData.hits); //if on first page, set the first 20 recipes for recipe array
         } else {
           if (currentPage == 2) {
-            setNextPageUrl(jsonData._links.next.href);
+            setNextPageUrl(jsonData._links.next.href); //set this for fetchChangePage
           }
           setChangingPage(true);
         }
         setIsLoading(false);
       } else {
-        console.log("diff");
-        setCurrentPage(1);
-        setRecipeArray(jsonData.hits);
+        //if the user changes the search input
+        setCurrentPage(1); //reset page number
+        setRecipeArray(jsonData.hits); //reset recipe arrays
       }
     } catch (error) {
       setError(error);
@@ -110,8 +109,8 @@ function RecipeList({ navigation }) {
       fetchChangePage();
     }
   }, [changingPage]);
+
   const fetchChangePage = async () => {
-    console.log("fetch 2");
     try {
       let allRecipesArray = [...recipesArray];
       let addedArray = [];
@@ -119,10 +118,10 @@ function RecipeList({ navigation }) {
       response = await fetch(nextPageLink);
       jsonData = await response.json();
       addedArray = [...jsonData.hits];
-      allRecipesArray = [...allRecipesArray, ...addedArray];
-      setNextPageUrl(jsonData._links.next.href);
+      allRecipesArray = [...allRecipesArray, ...addedArray]; //combine old recipes and new recipes
+      setNextPageUrl(jsonData._links.next.href); //set this again if next page has to be generated
 
-      setRecipeArray(allRecipesArray);
+      setRecipeArray(allRecipesArray); // set this to have all recipes
     } catch (error) {
       setError(error.message);
     }

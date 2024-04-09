@@ -1,31 +1,91 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Platform,
-  StatusBar,
-  SafeAreaView,
   Image,
   Linking,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
-
+import { useNavigation } from "@react-navigation/native";
+import "firebase/firestore";
+import db from "./database.js";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  setDoc,
+  orderBy,
+  limit,
+  addDoc,
+  deleteDoc,
+} from "firebase/firestore";
 function RecipeDetails({ route }) {
   const { recipe } = route.params;
+  const navigation = useNavigation();
+  const loggedInUserID = route.params.loggedInUserID;
 
+  const [saved, setSaved] = useState(false);
+
+  const saveRecipe = async () => {
+    try {
+      const ucr = collection(db, "Users");
+      const udr = doc(ucr, loggedInUserID);
+      const ufrc = collection(udr, "FavoriteRecipes");
+      if (saved == false) {
+        await addDoc(ufrc, {
+          Name: recipe.label,
+          uri: recipe.uri,
+        });
+        setSaved(true);
+      } else {
+        const querySnapshot = await getDocs(
+          query(ufrc, where("uri", "==", recipe.uri))
+        );
+        console.log(querySnapshot.ref);
+        querySnapshot.forEach((doc) => {
+          deleteDoc(doc.ref);
+        });
+        setSaved(false);
+      }
+    } catch (error) {
+      console.log("Error in saving recipe:", error);
+    }
+  };
+
+  const checkSaved = async () => {
+    try {
+      const ucr = collection(db, "Users");
+      const udr = doc(ucr, loggedInUserID);
+      const ufrc = collection(udr, "FavoriteRecipes");
+
+      const querySnapshot = await getDocs(
+        query(ufrc, where("uri", "==", recipe.uri))
+      );
+
+      if (!querySnapshot.empty) {
+        setSaved(true);
+      }
+    } catch (error) {
+      console.log("Error in saving recipe:", error);
+    }
+  };
+  useEffect(() => {
+    checkSaved();
+  }, []);
   const openLink = (url) => {
     Linking.openURL(url);
   };
-  useEffect(() => {
-    console.log(recipe.ingredients);
-  }, []);
+
   return (
     <ScrollView style={styles.wholeContainer}>
       <View>
-        <TouchableOpacity>
-          <Text>Back button</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.backButton}>⇦</Text>
         </TouchableOpacity>
       </View>
       <View
@@ -38,8 +98,19 @@ function RecipeDetails({ route }) {
         <Image source={{ uri: recipe.image }} style={styles.images} />
       </View>
       <Text></Text>
-      <View>
-        <Text style={styles.titleText}>{recipe.label}</Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+        <View style={{ flex: 5 }}>
+          <Text style={styles.titleText}>{recipe.label}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <TouchableOpacity onPress={() => saveRecipe(recipe.uri)}>
+            {saved ? (
+              <Text style={styles.savingRecipeButton}>✔</Text>
+            ) : (
+              <Text style={styles.savingRecipeButton}>+</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
       <Text></Text>
       <View style={styles.quickInfoContainer}>
@@ -138,8 +209,19 @@ const styles = StyleSheet.create({
     fontSize: 17,
     padding: 4,
   },
+  backButton: {
+    fontSize: 35,
+    Color: "#445F48",
+  },
+  savingRecipeButton: {
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#445F48",
+    height: 40,
+    width: 40,
+    fontSize: 30,
+    textAlign: "center",
+  },
 });
 
 export default RecipeDetails;
-
-/* <Button title="Go Back" onPress={() => navigation.goBack()} /> */
