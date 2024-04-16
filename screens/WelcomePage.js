@@ -10,21 +10,9 @@ import {
   StatusBar,
   Modal,
 } from "react-native";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import db from "./database.js";
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  setDoc,
-  orderBy,
-  limit,
-  addDoc,
-  deleteDoc,
-} from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
 import Buttons from "./Buttons.js";
 
 function WelcomePage(props) {
@@ -46,7 +34,8 @@ function WelcomePage(props) {
   const [incorrectLoginDetailsMessage, setIncorrectLoginDetailsMessage] =
     useState(false);
   const [fillInBlanksMessage, setFillInBlanksMessage] = useState(false);
-
+  const [incorrectEmailFormatMessage, setIncorrectEmailFormatMessage] =
+    useState(false);
   // login state
   const [loggedIn, setLoggedIn] = useState(false);
   const [loggedInUserID, setLoggedInUserID] = useState("");
@@ -56,29 +45,41 @@ function WelcomePage(props) {
   const registerUser = async () => {
     setAlreadyRegisteredMessage(false);
     setFillInBlanksMessage(false);
+    setIncorrectEmailFormatMessage(false);
     if (firstName != "" && lastName != "" && email != "" && password != "") {
-      try {
-        const ucr = collection(db, "Users");
-        const q = query(ucr, where("email", "==", email));
-        const querySnapshot = await getDocs(q);
-        const emailExists = !querySnapshot.empty;
-        if (!emailExists) {
-          await addDoc(ucr, {
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            password: password,
-          });
-          setRegisterModalVisible(false);
-        } else {
-          setAlreadyRegisteredMessage(true);
+      if (validateEmail(email)) {
+        try {
+          const ucr = collection(db, "Users");
+          const q = query(ucr, where("email", "==", email));
+          const querySnapshot = await getDocs(q);
+          const emailExists = !querySnapshot.empty;
+          if (!emailExists) {
+            await addDoc(ucr, {
+              firstName: firstName,
+              lastName: lastName,
+              email: email,
+              password: password,
+              ReminderTime: 3,
+            });
+            setRegisterModalVisible(false);
+          } else {
+            setAlreadyRegisteredMessage(true);
+          }
+        } catch (error) {
+          console.log("Error registering user ", error);
         }
-      } catch (error) {
-        console.log("Error registering user ", error);
+      } else {
+        setIncorrectEmailFormatMessage(true);
       }
     } else {
       setFillInBlanksMessage(true);
     }
+  };
+
+  const validateEmail = (email) => {
+    // Regular expression for email validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
   };
 
   const loginUser = async () => {
@@ -141,6 +142,7 @@ function WelcomePage(props) {
                 style={styles.registertextInput}
                 onChangeText={setEmail}
                 value={email}
+                keyboardType="email-address"
               ></TextInput>
               <Text style={styles.registerText}>Password</Text>
               <TextInput
@@ -159,6 +161,11 @@ function WelcomePage(props) {
               {fillInBlanksMessage == true ? (
                 <Text style={styles.errorText}>
                   Fill in all the blanks to register
+                </Text>
+              ) : null}
+              {incorrectEmailFormatMessage == true ? (
+                <Text style={styles.errorText}>
+                  Email is in incorrect format. Must be __@__.__
                 </Text>
               ) : null}
             </View>
@@ -209,7 +216,7 @@ function WelcomePage(props) {
 const styles = StyleSheet.create({
   wholeContainer: {
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    flex: 1,
+    height: "100%",
     backgroundColor: "#F5E2C8",
   },
   screenContainer: {

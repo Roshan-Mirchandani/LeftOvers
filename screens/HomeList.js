@@ -4,15 +4,12 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
-  Platform,
-  StatusBar,
   TouchableOpacity,
   Modal,
   TextInput,
   ScrollView,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
-import RNPickerSelect from "react-native-picker-select";
 import {
   MultipleSelectList,
   SelectList,
@@ -25,14 +22,13 @@ import {
   getDoc,
   collection,
   query,
-  where,
   getDocs,
   setDoc,
   orderBy,
-  limit,
   addDoc,
   deleteDoc,
 } from "firebase/firestore";
+import * as Notifications from "expo-notifications";
 
 function HomeList(route) {
   //userID
@@ -56,7 +52,7 @@ function HomeList(route) {
   //Folder fields
   const [folderName, setFolderName] = useState("");
 
-  //Data fecthers from backend
+  //Data fetchers from backend
   const [documents, setDocuments] = useState([]);
   const [folderDocuments, setFolderDocuments] = useState([]);
 
@@ -76,6 +72,12 @@ function HomeList(route) {
   const [editRemoveOptions, setEditRemoveOptions] = useState([]);
   const [editAddReady, setEditAddReady] = useState([]); //this and one below to set to use in function to send to database
   const [editRemoveReady, setEditRemoveReady] = useState([]);
+
+  //Notification states
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [lastCheckedDate1, setLastCheckedDate1] = useState("");
+  const [lastCheckedDate2, setLastCheckedDate2] = useState("");
+  const [reminderTime, setReminderTime] = useState(null);
 
   const fetchData = async () => {
     //called everytime the list needs to be rerendered in LIST VIEW
@@ -344,9 +346,9 @@ function HomeList(route) {
     }
   };
 
-  useEffect(() => {
-    createOptionsForEditFolder();
-  }, [editFolderModalVisible]);
+  // useEffect(() => {
+  //   createOptionsForEditFolder();
+  // }, [editFolderModalVisible]);
 
   const editFolder = async (addArray, remArray) => {
     const ucr = collection(db, "Users");
@@ -381,6 +383,166 @@ function HomeList(route) {
     const rowDate = new Date(date);
     return rowDate < currentDate;
   };
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+
+  useEffect(() => {
+    registerForPushNotifications();
+  }, []);
+
+  const registerForPushNotifications = async () => {
+    try {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync({
+          ios: {
+            allowAlert: true,
+            allowSound: true,
+            allowBadge: true,
+          },
+        });
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        console.log("Failed to get push token for push notification!");
+        return;
+      }
+      const token = (await Notifications.getExpoPushTokenAsync()).data;
+      setExpoPushToken(token);
+    } catch (error) {
+      console.log("Error while registering for push notifications:", error);
+    }
+  };
+
+  useEffect(() => {
+    const notificationListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log(notification);
+      }
+    );
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener);
+    };
+  }, []);
+
+  const sendNotification = async (message) => {
+    try {
+      await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "Accept-Encoding": "gzip, deflate",
+          Host: "exp.host",
+        },
+        body: JSON.stringify(message),
+      });
+      console.log("Notification sent successfully");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
+  };
+  useEffect(() => {
+    sendExpiryNotification();
+    sendWarningNotification();
+    const interval = setInterval(() => {
+      sendExpiryNotification();
+      sendWarningNotification();
+    }, 1000 * 60 * 60); // 1 min in milliseconds * 60  i.e. checks every hour for a new day
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const sendExpiryNotification = () => {
+    const currentDate = new Date();
+    const currentDateString = currentDate.toISOString().split("T")[0];
+    //ignored if it has been checked on same day
+    if (currentDateString !== lastCheckedDate1) {
+      if (documents.length != 0) {
+        // to prevent updating lastcheckeddate for no reason
+        setLastCheckedDate1(currentDateString); //if a new day then set it so it doesnt run again same day
+        for (i = 0; i < documents.length; i++) {
+          itemDate = new Date(documents[i].Date);
+          if (itemDate < currentDate) {
+            const message = {
+              to: expoPushToken,
+              sound: "default",
+              title: "You have an expired ingredient!",
+              body: `Your ${
+                documents[i].Name
+              }, has gone bad, its expiry date was the ${formatDate(
+                documents[i].Date
+              )}`,
+            };
+            sendNotification(message);
+          }
+        }
+      }
+    }
+  };
+
+  const sendWarningNotification = () => {
+    const currentDate = new Date();
+    const currentDateString = currentDate.toISOString().split("T")[0];
+    //ignored if it has been checked on same day
+    if (currentDateString !== lastCheckedDate2) {
+      if (documents.length != 0) {
+        // to prevent updating lastcheckeddate for no reason
+        setLastCheckedDate2(currentDateString); //if a new day then set it so it doesnt run again same day
+        for (i = 0; i < documents.length; i++) {
+          itemDate = new Date(documents[i].Date);
+          if (isCloseToExpiry(currentDate, new Date(documents[i].Date))) {
+            const message = {
+              to: expoPushToken,
+              sound: "default",
+              title: "Dont forget about this ingredient!",
+              body: `Your ${
+                documents[i].Name
+              }, will go bad soon, its expiry date is the ${formatDate(
+                documents[i].Date
+              )}`,
+            };
+            sendNotification(message);
+          }
+        }
+      }
+    }
+  };
+
+  const isCloseToExpiry = (currentDate, expiryDate) => {
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const differenceInDays = Math.ceil(
+      (expiryDate - currentDate) / millisecondsPerDay
+    );
+    if (differenceInDays < reminderTime && differenceInDays > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+  useEffect(() => {
+    const getReminderTime = async () => {
+      try {
+        const ucr = collection(db, "Users");
+        const udr = doc(ucr, loggedInUserID);
+        time = (await getDoc(udr)).data().ReminderTime;
+        setReminderTime(time);
+      } catch (error) {
+        console.log("Error getting users reminder time:", error);
+      }
+    };
+    getReminderTime();
+  }, []);
+
   {
     /*-----------------------returns--------------------------- */
   }

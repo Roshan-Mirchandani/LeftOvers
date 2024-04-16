@@ -13,14 +13,10 @@ import "firebase/firestore";
 import db from "./database.js";
 import {
   doc,
-  getDoc,
   collection,
   query,
   where,
   getDocs,
-  setDoc,
-  orderBy,
-  limit,
   addDoc,
   deleteDoc,
 } from "firebase/firestore";
@@ -113,6 +109,10 @@ function RecipeDetails({ route }) {
         </View>
       </View>
       <Text></Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+        <Text>Average Rating: 4.6/5</Text>
+        <Text>4 ratings</Text>
+      </View>
       <View style={styles.quickInfoContainer}>
         <View style={styles.row}>
           <Text style={styles.quickInfoText}>

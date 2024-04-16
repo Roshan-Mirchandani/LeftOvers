@@ -9,21 +9,19 @@ function RecipePageNavigator(route) {
   const loggedInUserID = route.route.params.loggedInUserID;
 
   return (
-    <NavigationContainer independent={true}>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="RecipeList"
-          component={RecipeList}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="RecipeDetails"
-          component={RecipeDetails}
-          options={{ headerShown: false }}
-          initialParams={{ loggedInUserID: loggedInUserID }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator>
+      <Stack.Screen
+        name="RecipeList"
+        component={RecipeList}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="RecipeDetails"
+        component={RecipeDetails}
+        options={{ headerShown: false }}
+        initialParams={{ loggedInUserID: loggedInUserID }}
+      />
+    </Stack.Navigator>
   );
 }
 

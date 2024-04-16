@@ -3,10 +3,7 @@ import {
   Text,
   View,
   TouchableOpacity,
-  SafeAreaView,
   StyleSheet,
-  Platform,
-  StatusBar,
   Modal,
   TextInput,
 } from "react-native";
@@ -15,14 +12,10 @@ import "firebase/firestore";
 import db from "./database.js";
 import {
   doc,
-  getDoc,
   collection,
   query,
-  where,
   getDocs,
-  setDoc,
   orderBy,
-  limit,
   addDoc,
   deleteDoc,
 } from "firebase/firestore";

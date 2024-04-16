@@ -1,10 +1,7 @@
-import React, { useEffect } from "react";
-import { Image, Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Image, View, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
 
 import InventoryManager from "./InventoryManager";
-import RecipeGenerator from "./RecipeGenerator";
 import Settings from "./Settings";
 import RecipePageNavigator from "./RecipePageNavigator";
 
@@ -14,6 +11,7 @@ function Buttons({ loggedInUserID, logOutUser }) {
   return (
     <View style={styles.button_container}>
       <Tab.Navigator
+        tabBarHideOnKeyboard={true}
         initialRouteName="Inventory Manager"
         screenOptions={({ route }) => ({
           tabBarInactiveBackgroundColor: "#709976",

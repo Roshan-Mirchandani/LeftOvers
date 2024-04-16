@@ -254,6 +254,7 @@ const styles = StyleSheet.create({
   },
   wholeContainer: {
     flex: 1,
+    height: "100%",
     backgroundColor: "#F5E2C8",
   },
   next: { right: 10 },
