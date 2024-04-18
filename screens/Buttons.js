@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import InventoryManager from "./InventoryManager";
 import Settings from "./Settings";
+import SettingsFavoritesNavigator from "./SettingsFavoritesNavigator";
 import RecipePageNavigator from "./RecipePageNavigator";
 
 const Tab = createBottomTabNavigator();
@@ -55,7 +56,7 @@ function Buttons({ loggedInUserID, logOutUser }) {
 
         <Tab.Screen
           name="Settings"
-          component={Settings}
+          component={SettingsFavoritesNavigator}
           options={{ headerShown: false }}
           initialParams={{
             loggedInUserID: loggedInUserID,

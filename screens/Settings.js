@@ -31,8 +31,8 @@ function Settings({ route, navigation }) {
 
   const [updating, setUpdating] = useState(true); // switching between true and false for useEffect hook,doesnt mean anything
   const goToRecipeDetails = (item) => {
-    console.log(route.params);
-    navigation.navigate("RecipeDetails", { recipe: item });
+    console.log("item", item);
+    navigation.navigate("RecipeDetails", { recipe: item.recipe });
   };
 
   const fetchData = async () => {

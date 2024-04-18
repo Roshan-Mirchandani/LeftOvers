@@ -27,6 +27,7 @@ import {
   orderBy,
   addDoc,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import * as Notifications from "expo-notifications";
 
@@ -57,7 +58,7 @@ function HomeList(route) {
   const [folderDocuments, setFolderDocuments] = useState([]);
 
   //used for seleccting rows
-  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null); //holds ID of items
   const [docBeingEdited, setDocBeingEdited] = useState([]); // used to find which row is being Edited so can be used as placeholders
 
   //Rendering states
@@ -255,6 +256,17 @@ function HomeList(route) {
       const ufcr = collection(udr, "UserFood");
       const ufdr = doc(ufcr, selectedRow);
       await deleteDoc(ufdr);
+
+      const ufscr = collection(udr, "FolderSystem");
+      allFolders = await getDocs(ufscr); // need to get all references of foldersystem collection
+      allFolders.forEach(async (folderDoc) => {
+        const folderData = folderDoc.data();
+        const { Name, Items, id } = folderData;
+
+        const updatedItems = Items.filter((item) => item != selectedRow);
+        await updateDoc(doc(ufscr, folderDoc.id), { Items: updatedItems });
+      });
+
       console.log("Document successfully deleted!");
     } catch (error) {
       console.error("Error deleting document: ", error);
@@ -283,6 +295,7 @@ function HomeList(route) {
         setAddFolderModalVisible(false);
         setFolderName("");
         fetchFolderData();
+        setAddToFolder([]);
       }
     } catch (error) {
       console.error("Error making Folder: ", error);
@@ -358,7 +371,6 @@ function HomeList(route) {
     const data = await getDoc(ufsdr);
     current_array = data.data().Items;
     folder_Name = data.data().Name;
-    console.log(current_array);
     for (var j = 0; j < folderDocuments.length; j++) {
       if (folderDocuments[j].id == selectedRow) {
         console.log(1);
@@ -558,6 +570,9 @@ function HomeList(route) {
         }}
       >
         <View style={styles.modal}>
+          <TouchableOpacity onPress={() => setAddModalVisible(false)}>
+            <Text style={styles.X}>X</Text>
+          </TouchableOpacity>
           <Text style={styles.modalText}>Name</Text>
           <TextInput
             onChangeText={setAddItemText}
@@ -584,6 +599,7 @@ function HomeList(route) {
           </TouchableOpacity>
           <Modal
             visible={calendarVisible}
+            transparent={true}
             onRequestClose={() => {
               setCalendarVisible(!calendarVisible);
             }}
@@ -616,6 +632,9 @@ function HomeList(route) {
         }}
       >
         <View style={styles.modal}>
+          <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+            <Text style={styles.X}>X</Text>
+          </TouchableOpacity>
           <Text style={styles.modalText}>Name</Text>
           <TextInput
             onChangeText={setAddItemText}
@@ -656,6 +675,7 @@ function HomeList(route) {
 
           <Modal
             visible={calendarVisible}
+            transparent={true}
             onRequestClose={() => {
               setCalendarVisible(!calendarVisible);
             }}
@@ -684,6 +704,9 @@ function HomeList(route) {
         }}
       >
         <View style={styles.modal}>
+          <TouchableOpacity onPress={() => setDelModalVisible(false)}>
+            <Text style={styles.X}>X</Text>
+          </TouchableOpacity>
           <Text style={[styles.modalText, { paddingTop: 50 }]}>
             Are you sure you want to delete the following record?
           </Text>
@@ -709,7 +732,10 @@ function HomeList(route) {
           setAddFolderModalVisible(!addFolderModalVisible);
         }}
       >
-        <View style={[styles.modal, { height: 500 }]}>
+        <View style={[styles.modal, { height: 600 }]}>
+          <TouchableOpacity onPress={() => setAddFolderModalVisible(false)}>
+            <Text style={styles.X}>X</Text>
+          </TouchableOpacity>
           <Text style={styles.modalText}>Name of Folder:</Text>
           <TextInput
             onChangeText={setFolderName}
@@ -741,7 +767,10 @@ function HomeList(route) {
           setEditFolderModalVisible(!editFolderModalVisible);
         }}
       >
-        <View style={[styles.modal, { height: 500 }]}>
+        <View style={[styles.modal, { height: 600 }]}>
+          <TouchableOpacity onPress={() => setEditFolderModalVisible(false)}>
+            <Text style={styles.X}>X</Text>
+          </TouchableOpacity>
           <Text style={styles.modalText}>Name</Text>
           <TextInput
             onChangeText={setFolderName}
@@ -804,6 +833,9 @@ function HomeList(route) {
         }}
       >
         <View style={styles.modal}>
+          <TouchableOpacity onPress={() => setDelFolderModalVisible(false)}>
+            <Text style={styles.X}>X</Text>
+          </TouchableOpacity>
           <Text style={[styles.modalText, { paddingTop: 50 }]}>
             Are you sure you want to delete the following Folder and all its
             content?
@@ -1010,7 +1042,7 @@ const styles = StyleSheet.create({
   },
 
   modal: {
-    height: 300,
+    height: 320,
     width: "94%",
     marginTop: "25%",
     marginLeft: "3%",
@@ -1041,11 +1073,13 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   calendarModal: {
-    height: 300,
+    height: 320,
     width: "94%",
     marginTop: "25%",
     marginLeft: "3%",
     marginRight: "3%",
+    borderWidth: 2,
+    borderColor: "#445f48",
   },
   navBarButtons: {
     color: "#F9EDDD",
@@ -1104,6 +1138,13 @@ const styles = StyleSheet.create({
 
   dropdownTextStyles: {
     color: "#F6E3CB",
+  },
+  X: {
+    alignSelf: "flex-end",
+    paddingRight: 10,
+    paddingTop: 5,
+    fontSize: 20,
+    color: "#445f48",
   },
 });
 

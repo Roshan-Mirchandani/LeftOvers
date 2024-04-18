@@ -30,16 +30,16 @@ function RecipeList({ navigation }) {
 
   //function to split ingredient list into array and then concatenate query
   const handleSearch = () => {
-    textInputValueArray = textInputValue.split(" ");
-    if (textInputValueArray.length == 1) {
-      changeQueryText(textInputValueArray[0]);
-    } else {
+    if (textInputValue.includes(" ")) {
+      textInputValueArray = textInputValue.split(" ");
       for (var i = 0; i < textInputValueArray.length - 1; i++) {
         mergingInputText += textInputValueArray[i] + "%20";
       }
       mergingInputText += textInputValueArray[i];
       changeQueryText(mergingInputText);
       setIsSearching(true);
+    } else {
+      changeQueryText(textInputValue);
     }
     setIsLoading(false);
   };
@@ -165,7 +165,7 @@ function RecipeList({ navigation }) {
             />
             <View style={styles.button}>
               <TouchableOpacity onPress={nextPage}>
-                <Text style={styles.buttonText}>More Recipes</Text>
+                <Text style={styles.buttonText}> ⬇More Recipes⬇</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -260,3 +260,15 @@ const styles = StyleSheet.create({
   next: { right: 10 },
 });
 export default RecipeList;
+
+// textInputValueArray = textInputValue.split(" ");
+// if (textInputValueArray.length == 1) {
+//   changeQueryText(textInputValueArray[0]);
+// } else {
+//   for (var i = 0; i < textInputValueArray.length - 1; i++) {
+//     mergingInputText += textInputValueArray[i] + "%20";
+//   }
+//   mergingInputText += textInputValueArray[i];
+//   changeQueryText(mergingInputText);
+//   setIsSearching(true);
+// }
