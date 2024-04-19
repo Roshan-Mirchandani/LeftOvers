@@ -159,12 +159,7 @@ function HomeList(route) {
 
   const addItemtoDatabase = async () => {
     try {
-      if (
-        addItemText != null &&
-        addItemQuantity != null &&
-        expiryDate != null &&
-        unit != null
-      ) {
+      if (addItemText != "" && addItemQuantity != "" && expiryDate != "") {
         const ucr = collection(db, "Users");
         const udr = doc(ucr, loggedInUserID);
         const ufcr = collection(udr, "UserFood");
@@ -174,13 +169,14 @@ function HomeList(route) {
           Quantity: addItemQuantity,
           Unit: unit,
         });
+
+        setAddItemText("");
+        setAddItemQuantity("");
+        setExpiryDate("");
+        setUnit("");
+        setAddModalVisible(false);
+        fetchData();
       }
-      setAddItemText("");
-      setAddItemQuantity("");
-      setExpiryDate("");
-      setUnit("");
-      setAddModalVisible(false);
-      fetchData();
     } catch (error) {
       console.error("Error adding item:", error);
     }
@@ -189,26 +185,28 @@ function HomeList(route) {
   useEffect(() => {
     //this is used to set docBeingEdited to assign place holders
     const assignSelectedRow = () => {
+      fetchData();
       if (selectedRow != null) {
         if (listOrFolder == "List") {
           for (var i = 0; i < documents.length; i++) {
             if (documents[i].id == selectedRow) {
               setDocBeingEdited(documents[i]);
+              console.log(documents[i]);
             }
           }
         } else {
+          fetchFolderData();
           for (var j = 0; j < folderDocuments.length; j++) {
             if (folderDocuments[j].id == selectedRow) {
               setDocBeingEdited(folderDocuments[j]);
             }
           }
         }
-        //console.log(docBeingEdited);
       }
     };
     // useEffect used to update whenever a new row is clicked on for EDITING or DELETING
     assignSelectedRow();
-  }, [selectedRow]);
+  }, [selectedRow, editFolderModalVisible, editModalVisible]);
 
   const editItem = async () => {
     let updatedValues = {}; // used to allow for autofill, updating states was taking too long so made a new variable locally
@@ -251,6 +249,7 @@ function HomeList(route) {
 
   const deleteItem = async () => {
     try {
+      console.log("running");
       const ucr = collection(db, "Users");
       const udr = doc(ucr, loggedInUserID);
       const ufcr = collection(udr, "UserFood");
@@ -259,15 +258,17 @@ function HomeList(route) {
 
       const ufscr = collection(udr, "FolderSystem");
       allFolders = await getDocs(ufscr); // need to get all references of foldersystem collection
-      allFolders.forEach(async (folderDoc) => {
-        const folderData = folderDoc.data();
-        const { Name, Items, id } = folderData;
-
-        const updatedItems = Items.filter((item) => item != selectedRow);
-        await updateDoc(doc(ufscr, folderDoc.id), { Items: updatedItems });
-      });
-
-      console.log("Document successfully deleted!");
+      if (!allFolders.empty) {
+        console.log("not empty");
+        allFolders.forEach(async (folderDoc) => {
+          const folderData = folderDoc.data();
+          const { Name, Items, id } = folderData;
+          const updatedItems = Items.filter((item) => item != selectedRow);
+          await updateDoc(doc(ufscr, folderDoc.id), { Items: updatedItems });
+          console.log("Document successfully deleted!");
+        });
+      }
+      setSelectedRow(null);
     } catch (error) {
       console.error("Error deleting document: ", error);
     }
@@ -314,7 +315,9 @@ function HomeList(route) {
     }
     setDelFolderModalVisible(false);
     fetchFolderData();
+    setSelectedRow(null);
   };
+
   const createOptionsForAddFolder = () => {
     temp = [];
     for (var i = 0; i < documents.length; i++) {
@@ -331,6 +334,7 @@ function HomeList(route) {
   the second array that are options to remove from a folder*/
   const createOptionsForEditFolder = () => {
     let addArray = [];
+
     if (documents != []) {
       /* over here*/
       for (var i = 0; i < documents.length; i++) {
@@ -359,11 +363,14 @@ function HomeList(route) {
     }
   };
 
-  // useEffect(() => {
-  //   createOptionsForEditFolder();
-  // }, [editFolderModalVisible]);
+  useEffect(() => {
+    if (editFolderModalVisible == true) {
+      createOptionsForEditFolder();
+    }
+  }, [editFolderModalVisible]);
 
   const editFolder = async (addArray, remArray) => {
+    console.log("add", addArray, "rem", remArray);
     const ucr = collection(db, "Users");
     const udr = doc(ucr, loggedInUserID);
     const ufscr = collection(udr, "FolderSystem");
@@ -373,10 +380,8 @@ function HomeList(route) {
     folder_Name = data.data().Name;
     for (var j = 0; j < folderDocuments.length; j++) {
       if (folderDocuments[j].id == selectedRow) {
-        console.log(1);
         for (const item of addArray) {
           if (!current_array.some((existingItem) => existingItem === item)) {
-            console.log(2);
             current_array.push(item);
           }
         }
@@ -386,6 +391,10 @@ function HomeList(route) {
       }
     }
     await setDoc(ufsdr, { Name: folder_Name, Items: current_array });
+    setEditAddOptions([]);
+    setEditAddReady([]);
+    setEditRemoveOptions([]);
+    setEditRemoveReady([]);
     setEditFolderModalVisible(false);
     fetchFolderData();
   };
@@ -640,7 +649,6 @@ function HomeList(route) {
             onChangeText={setAddItemText}
             value={addItemText}
             placeholder={docBeingEdited.Name}
-            placeholderTextColor={"#F6E3CB"}
             style={styles.modalTextInput}
           />
 
@@ -649,7 +657,6 @@ function HomeList(route) {
             onChangeText={setAddItemQuantity}
             value={addItemQuantity}
             placeholder={docBeingEdited.Quantity}
-            placeholderTextColor={"#F6E3CB"}
             style={styles.modalTextInput}
           />
 
@@ -658,7 +665,6 @@ function HomeList(route) {
             onChangeText={setUnit}
             value={unit}
             placeholder={docBeingEdited.Unit}
-            placeholderTextColor={"#F6E3CB"}
             style={styles.modalTextInput}
           />
 
@@ -1035,6 +1041,7 @@ const styles = StyleSheet.create({
     borderColor: "#709976",
     backgroundColor: "#445f48",
     borderWidth: 3,
+    marginBottom: 5,
   },
   listContainer: {
     flex: 12,

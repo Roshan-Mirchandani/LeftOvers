@@ -190,11 +190,11 @@ function WelcomePage(props) {
             ></TextInput>
             <Text></Text>
             <TouchableOpacity onPress={() => loginUser()}>
-              <Text style={styles.text}>Log in</Text>
+              <Text style={styles.button}>Log in</Text>
             </TouchableOpacity>
             <Text></Text>
             <TouchableOpacity onPress={() => setRegisterModalVisible(true)}>
-              <Text style={styles.text}>Register</Text>
+              <Text style={styles.button}>Register</Text>
               <Text></Text>
             </TouchableOpacity>
             {noUserRegisteredMessage == true ? (
@@ -273,6 +273,14 @@ const styles = StyleSheet.create({
     width: "80%",
     height: 30,
     paddingLeft: 10,
+  },
+  button: {
+    color: "#F5E2C8",
+    fontSize: 18,
+    backgroundColor: "#445F48",
+    borderRadius: 10,
+    padding: 10,
+    paddingHorizontal: 20,
   },
 });
 

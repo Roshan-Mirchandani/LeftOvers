@@ -40,6 +40,7 @@ function RecipeList({ navigation }) {
       setIsSearching(true);
     } else {
       changeQueryText(textInputValue);
+      setIsSearching(true);
     }
     setIsLoading(false);
   };
@@ -76,6 +77,7 @@ function RecipeList({ navigation }) {
     const query = queryText;
     setCurrentSearch(queryText);
     try {
+      console.log(query);
       const response = await fetch(
         `https://api.edamam.com/api/recipes/v2?type=public&q=${query}&app_id=${apiAppID}&app_key=${apiKey}`
       );

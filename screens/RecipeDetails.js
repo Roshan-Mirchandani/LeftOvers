@@ -24,7 +24,6 @@ import {
 } from "firebase/firestore";
 
 function RecipeDetails({ route }) {
-  console.log("route", route);
   const { recipe } = route.params;
   const navigation = useNavigation();
   const loggedInUserID = route.params.loggedInUserID;
@@ -253,11 +252,12 @@ function RecipeDetails({ route }) {
       } //final case is user changing his rating
       else {
         updatedStarNumber = changeRating();
+        setFullStarNumber(null);
+        setEmptyStarNumber(null);
         setStarNumber(updatedStarNumber); // for other methods like recipeRatings()
         const recipeRef = querySnapshot.docs[0].ref; // referencing the recipe doc
         const ucr = collection(recipeRef, "Users"); // referencing the collection in that doc
         const udr = doc(ucr, loggedInUserID);
-        console.log("sta", starNumber);
         await setDoc(udr, {
           //change the doc before getting new average
           rating: updatedStarNumber,
@@ -269,7 +269,6 @@ function RecipeDetails({ route }) {
           ratings.push(doc.data().rating); //adds all ratings to compute average
         });
         const average = averageRating(ratings);
-        console.log("running1", ratings, average);
         await setDoc(recipeRef, {
           AverageRating: average,
           TotalRatings: ratings.length,

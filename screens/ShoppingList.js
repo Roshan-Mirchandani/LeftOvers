@@ -110,6 +110,7 @@ function ShoppingList(route) {
   };
 
   const transferToHomeList = async () => {
+    console.log("se", selectedRow);
     try {
       if (addItemQuantity != "" && expiryDate != "") {
         let itemName = "";
@@ -171,6 +172,9 @@ function ShoppingList(route) {
         }}
       >
         <View style={styles.modal}>
+          <TouchableOpacity onPress={() => setAddModalVisible(false)}>
+            <Text style={styles.X}>X</Text>
+          </TouchableOpacity>
           <Text style={[styles.modalText, { paddingTop: 50 }]}>Add:</Text>
           <TextInput
             onChangeText={setAddShoppingItem}
@@ -193,6 +197,9 @@ function ShoppingList(route) {
         }}
       >
         <View style={styles.modal}>
+          <TouchableOpacity onPress={() => setDelModalVisible(false)}>
+            <Text style={styles.X}>X</Text>
+          </TouchableOpacity>
           <Text style={[styles.modalText, { paddingTop: 50 }]}>
             Are you sure you want to delete the following record?
           </Text>
@@ -214,6 +221,9 @@ function ShoppingList(route) {
         }}
       >
         <View style={styles.modal}>
+          <TouchableOpacity onPress={() => setBoughtModalVisible(false)}>
+            <Text style={styles.X}>X</Text>
+          </TouchableOpacity>
           <Text style={styles.modalText}>Name</Text>
           <TextInput
             onChangeText={setAddItemText}
@@ -285,7 +295,11 @@ function ShoppingList(route) {
         <TouchableOpacity onPress={() => setAddModalVisible(true)}>
           <Text style={styles.navBarButtons}>Add</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setBoughtModalVisible(true)}>
+        <TouchableOpacity
+          onPress={() =>
+            selectedRow != null ? setBoughtModalVisible(true) : null
+          }
+        >
           <Text style={styles.navBarButtons}>Bought</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setDelModalVisible(true)}>
@@ -375,6 +389,13 @@ const styles = StyleSheet.create({
   selectedRow: {
     fontSize: 20,
     fontWeight: "bold",
+  },
+  X: {
+    alignSelf: "flex-end",
+    paddingRight: 10,
+    paddingTop: 5,
+    fontSize: 20,
+    color: "#445f48",
   },
 });
 
