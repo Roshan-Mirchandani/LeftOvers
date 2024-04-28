@@ -191,7 +191,6 @@ function HomeList(route) {
           for (var i = 0; i < documents.length; i++) {
             if (documents[i].id == selectedRow) {
               setDocBeingEdited(documents[i]);
-              console.log(documents[i]);
             }
           }
         } else {
@@ -249,7 +248,6 @@ function HomeList(route) {
 
   const deleteItem = async () => {
     try {
-      console.log("running");
       const ucr = collection(db, "Users");
       const udr = doc(ucr, loggedInUserID);
       const ufcr = collection(udr, "UserFood");
@@ -259,7 +257,6 @@ function HomeList(route) {
       const ufscr = collection(udr, "FolderSystem");
       allFolders = await getDocs(ufscr); // need to get all references of foldersystem collection
       if (!allFolders.empty) {
-        console.log("not empty");
         allFolders.forEach(async (folderDoc) => {
           const folderData = folderDoc.data();
           const { Name, Items, id } = folderData;
@@ -370,7 +367,6 @@ function HomeList(route) {
   }, [editFolderModalVisible]);
 
   const editFolder = async (addArray, remArray) => {
-    console.log("add", addArray, "rem", remArray);
     const ucr = collection(db, "Users");
     const udr = doc(ucr, loggedInUserID);
     const ufscr = collection(udr, "FolderSystem");
@@ -472,9 +468,11 @@ function HomeList(route) {
       console.error("Error sending notification:", error);
     }
   };
+
   useEffect(() => {
     sendExpiryNotification();
     sendWarningNotification();
+
     const interval = setInterval(() => {
       sendExpiryNotification();
       sendWarningNotification();
@@ -488,8 +486,8 @@ function HomeList(route) {
     const currentDateString = currentDate.toISOString().split("T")[0];
     //ignored if it has been checked on same day
     if (currentDateString !== lastCheckedDate1) {
+      // to prevent updating lastcheckeddate for no reasonn
       if (documents.length != 0) {
-        // to prevent updating lastcheckeddate for no reason
         setLastCheckedDate1(currentDateString); //if a new day then set it so it doesnt run again same day
         for (i = 0; i < documents.length; i++) {
           itemDate = new Date(documents[i].Date);
@@ -582,14 +580,15 @@ function HomeList(route) {
           <TouchableOpacity onPress={() => setAddModalVisible(false)}>
             <Text style={styles.X}>X</Text>
           </TouchableOpacity>
-          <Text style={styles.modalText}>Name</Text>
+          <Text style={styles.modalText}>Name *</Text>
           <TextInput
             onChangeText={setAddItemText}
             value={addItemText}
             style={styles.modalTextInput}
           />
-          <Text style={styles.modalText}>Quantity</Text>
+          <Text style={styles.modalText}>Quantity *</Text>
           <TextInput
+            keyboardType="numeric"
             onChangeText={setAddItemQuantity}
             value={addItemQuantity}
             style={styles.modalTextInput}
@@ -600,9 +599,9 @@ function HomeList(route) {
             value={unit}
             style={styles.modalTextInput}
           />
-          <Text style={styles.modalText}>Expiry Date:</Text>
+          <Text style={styles.modalText}>Expiry Date: *</Text>
           <TouchableOpacity onPress={() => setCalendarVisible(true)}>
-            <Text style={styles.modalText}>
+            <Text style={styles.modalTextInput}>
               {expiryDate === "" ? "DD-MM-YYYY" : formatDate(expiryDate)}
             </Text>
           </TouchableOpacity>
@@ -654,6 +653,7 @@ function HomeList(route) {
 
           <Text style={styles.modalText}>Quantity</Text>
           <TextInput
+            keyboardType="numeric"
             onChangeText={setAddItemQuantity}
             value={addItemQuantity}
             placeholder={docBeingEdited.Quantity}
@@ -670,7 +670,7 @@ function HomeList(route) {
 
           <Text style={styles.modalText}>Expiry Date:</Text>
           <TouchableOpacity onPress={() => setCalendarVisible(true)}>
-            <Text style={styles.modalText}>
+            <Text style={styles.modalTextInput}>
               {expiryDate != ""
                 ? formatDate(expiryDate)
                 : docBeingEdited != []
@@ -782,7 +782,6 @@ function HomeList(route) {
             onChangeText={setFolderName}
             value={folderName}
             placeholder={docBeingEdited.Name}
-            placeholderTextColor={"#F6E3CB"}
             style={styles.modalTextInput}
           />
           <Text style={styles.modalText}>Current Items in folder:</Text>

@@ -115,6 +115,7 @@ function WelcomePage(props) {
       {loggedIn == true ? (
         <Buttons loggedInUserID={loggedInUserID} logOutUser={logOutUser} />
       ) : (
+        // welcome page , if not logged in
         <View style={styles.screenContainer}>
           <Modal
             animationType="slide"
@@ -150,8 +151,9 @@ function WelcomePage(props) {
                 onChangeText={setPassword}
                 value={password}
               ></TextInput>
+              <Text></Text>
               <TouchableOpacity onPress={() => registerUser()}>
-                <Text style={styles.registerText}>Register</Text>
+                <Text style={styles.button}>Register</Text>
               </TouchableOpacity>
               {alreadyRegisteredMessage == true ? (
                 <Text style={styles.errorText}>
@@ -251,7 +253,7 @@ const styles = StyleSheet.create({
   },
 
   registerModal: {
-    height: 300,
+    height: 350,
     width: "94%",
     borderWidth: 4,
     borderColor: "#4F404C",

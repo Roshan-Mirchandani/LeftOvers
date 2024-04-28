@@ -2,7 +2,6 @@ import { Image, View, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import InventoryManager from "./InventoryManager";
-import Settings from "./Settings";
 import SettingsFavoritesNavigator from "./SettingsFavoritesNavigator";
 import RecipePageNavigator from "./RecipePageNavigator";
 

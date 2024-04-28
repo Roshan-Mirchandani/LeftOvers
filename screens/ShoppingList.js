@@ -110,16 +110,14 @@ function ShoppingList(route) {
   };
 
   const transferToHomeList = async () => {
-    console.log("se", selectedRow);
     try {
       if (addItemQuantity != "" && expiryDate != "") {
+        setBoughtModalVisible(false);
         let itemName = "";
         if (addItemText == "") {
           itemName = docBeingEdited.Name;
-          console.log(itemName);
         } else {
           itemName = addItemText;
-          console.log(itemName);
         }
         const ucr = collection(db, "Users");
         const udr = doc(ucr, loggedInUserID);
@@ -130,18 +128,17 @@ function ShoppingList(route) {
           Quantity: addItemQuantity,
           Unit: unit,
         });
+        setAddItemText("");
+        setAddItemQuantity("");
+        setExpiryDate("");
+        setUnit("");
+
+        const uscr = collection(udr, "ShoppingList");
+        const usdr = doc(uscr, selectedRow);
+        await deleteDoc(usdr);
       }
-      setAddItemText("");
-      setAddItemQuantity("");
-      setExpiryDate("");
-      setUnit("");
-      const ucr = collection(db, "Users");
-      const udr = doc(ucr, loggedInUserID);
-      const uscr = collection(udr, "ShoppingList");
-      const usdr = doc(uscr, selectedRow);
-      await deleteDoc(usdr);
+
       fetchData();
-      setBoughtModalVisible(false);
     } catch (error) {
       console.error("Error adding item:", error);
     }
@@ -224,7 +221,7 @@ function ShoppingList(route) {
           <TouchableOpacity onPress={() => setBoughtModalVisible(false)}>
             <Text style={styles.X}>X</Text>
           </TouchableOpacity>
-          <Text style={styles.modalText}>Name</Text>
+          <Text style={styles.modalText}>Name *</Text>
           <TextInput
             onChangeText={setAddItemText}
             value={addItemText}
@@ -232,12 +229,13 @@ function ShoppingList(route) {
             placeholderTextColor={"#F6E3CB"}
             style={styles.modalTextInput}
           />
-          <Text style={styles.modalText}>Quantity</Text>
+          <Text style={styles.modalText}>Quantity *</Text>
           <TextInput
             onChangeText={setAddItemQuantity}
             value={addItemQuantity}
             placeholderTextColor={"#F6E3CB"}
             style={styles.modalTextInput}
+            keyboardType="numeric"
           />
           <Text style={styles.modalText}>Unit</Text>
           <TextInput
@@ -246,9 +244,9 @@ function ShoppingList(route) {
             placeholderTextColor={"#F6E3CB"}
             style={styles.modalTextInput}
           />
-          <Text style={styles.modalText}>Expiry Date:</Text>
+          <Text style={styles.modalText}>Expiry Date *:</Text>
           <TouchableOpacity onPress={() => setCalendarVisible(true)}>
-            <Text style={styles.modalText}>
+            <Text style={styles.modalTextInput}>
               {expiryDate === "" ? "DD-MM-YYYY" : formatDate(expiryDate)}
             </Text>
           </TouchableOpacity>
@@ -331,7 +329,7 @@ const styles = StyleSheet.create({
   },
 
   modal: {
-    height: 300,
+    height: 350,
     width: "94%",
     marginTop: "25%",
     marginLeft: "3%",

@@ -1,4 +1,4 @@
-import React, { cloneElement, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,6 @@ import {
   addDoc,
   deleteDoc,
   setDoc,
-  updateDoc,
 } from "firebase/firestore";
 
 function RecipeDetails({ route }) {
@@ -90,7 +89,7 @@ function RecipeDetails({ route }) {
   const openLink = (url) => {
     Linking.openURL(url);
   };
-
+  //this gets recipe rating info: Averaging rating, total rating, uri
   const fetchRecipeRatings = async () => {
     try {
       const rcr = collection(db, "RatingsAndReviews");
@@ -155,7 +154,7 @@ function RecipeDetails({ route }) {
     }
     return ratingButtons;
   };
-
+  //this gets the user information on recipes, i.e. who rated what and how much
   const recipeRatingUsersInfo = async () => {
     try {
       const rcr = collection(db, "RatingsAndReviews");
@@ -224,7 +223,6 @@ function RecipeDetails({ route }) {
           //second case will be user hasnt seen it but it is already in the database
         } else {
           const recipeRef = querySnapshot.docs[0].ref; // referencing the recipe doc
-          //console.log(recipeRef);
           const ucr = collection(recipeRef, "Users"); // referencing the collection in that doc
           const userDocsSnapshot = await getDocs(ucr); //getting collective data of collection
           const userDocs = userDocsSnapshot.docs;
@@ -254,7 +252,9 @@ function RecipeDetails({ route }) {
         updatedStarNumber = changeRating();
         setFullStarNumber(null);
         setEmptyStarNumber(null);
-        setStarNumber(updatedStarNumber); // for other methods like recipeRatings()
+        if (updatedStarNumber != null) {
+          setStarNumber(updatedStarNumber);
+        } // for other methods like recipeRatings()
         const recipeRef = querySnapshot.docs[0].ref; // referencing the recipe doc
         const ucr = collection(recipeRef, "Users"); // referencing the collection in that doc
         const udr = doc(ucr, loggedInUserID);
@@ -355,20 +355,20 @@ function RecipeDetails({ route }) {
         {recipeRatings()}
       </View>
       <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
-        <Text>
+        <Text style={styles.quickInfoText}>
           {ratingInfo != null
             ? "Average Rating: " +
               parseFloat(ratingInfo.AverageRating.toFixed(1)) +
               "/5"
-            : "No ratings so far,Be the first to rate it!"}
+            : "No ratings so far"}
         </Text>
-        <Text>
+        <Text style={styles.quickInfoText}>
           {ratingInfo != null ? ratingInfo.TotalRatings : null}
           {ratingInfo != null
             ? ratingInfo.TotalRatings == 1
               ? " rating"
               : " ratings"
-            : null}
+            : "Be the first to rate it!"}
         </Text>
       </View>
       <View style={styles.quickInfoContainer}>
@@ -406,7 +406,7 @@ function RecipeDetails({ route }) {
       <View>
         <Text></Text>
         <TouchableOpacity onPress={() => openLink(recipe.url)}>
-          <Text style={styles.link}>instructions : {recipe.url}</Text>
+          <Text style={styles.link}>Click here for instructions!</Text>
         </TouchableOpacity>
       </View>
       <Text></Text>
@@ -465,10 +465,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     color: "#F5E2C8",
     fontSize: 17,
-    padding: 4,
+    padding: 5,
+    textAlign: "center",
+    width: "90%",
+    alignSelf: "center",
   },
   backButton: {
     fontSize: 35,
+    paddingLeft: 10,
   },
   savingRecipeButton: {
     borderRadius: 20,

@@ -31,7 +31,6 @@ function Settings({ route, navigation }) {
 
   const [updating, setUpdating] = useState(true); // switching between true and false for useEffect hook,doesnt mean anything
   const goToRecipeDetails = (item) => {
-    console.log("item", item);
     navigation.navigate("RecipeDetails", { recipe: item.recipe });
   };
 
@@ -111,7 +110,12 @@ function Settings({ route, navigation }) {
         updatedValues.email = userData[0].email;
       }
       if (reminderTime != null) {
-        updatedValues.ReminderTime = reminderTime;
+        //test if reminder time is a number
+        if (/^\d*$/.test(reminderTime)) {
+          updatedValues.ReminderTime = reminderTime;
+        } else {
+          updatedValues.ReminderTime = parseInt(userData[0].ReminderTime);
+        }
       } else {
         updatedValues.ReminderTime = parseInt(userData[0].ReminderTime);
       }
@@ -119,6 +123,10 @@ function Settings({ route, navigation }) {
       //update the view in settings
       await setDoc(udr, updatedValues);
       setUpdating(!updating);
+      setReminderTime("");
+      setFirstName("");
+      setLastName("");
+      setEmail("");
     } catch (error) {
       console.log("Error in changing profile info:", error);
     }
@@ -126,8 +134,6 @@ function Settings({ route, navigation }) {
   };
 
   const renderRecipeInfo = ({ item }) => {
-    //console.log("item:", item);
-
     return (
       <View style={styles.box1}>
         <TouchableOpacity onPress={() => goToRecipeDetails(item)}>
@@ -204,6 +210,7 @@ function Settings({ route, navigation }) {
                     Reminder Margin (days):
                   </Text>
                   <TextInput
+                    keyboardType="numeric"
                     placeholder={userData[0].ReminderTime.toString()}
                     onChangeText={setReminderTime}
                     value={reminderTime}

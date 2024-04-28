@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { StyleSheet, SafeAreaView, Platform, StatusBar } from "react-native";
+import { StyleSheet, SafeAreaView } from "react-native";
 
 const Tab = createMaterialTopTabNavigator();
 import HomeList from "./HomeList";

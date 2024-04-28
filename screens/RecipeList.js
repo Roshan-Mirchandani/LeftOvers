@@ -4,13 +4,10 @@ import {
   Text,
   Image,
   ActivityIndicator,
-  SafeAreaView,
   FlatList,
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Platform,
-  StatusBar,
 } from "react-native";
 
 function RecipeList({ navigation }) {
@@ -77,7 +74,6 @@ function RecipeList({ navigation }) {
     const query = queryText;
     setCurrentSearch(queryText);
     try {
-      console.log(query);
       const response = await fetch(
         `https://api.edamam.com/api/recipes/v2?type=public&q=${query}&app_id=${apiAppID}&app_key=${apiKey}`
       );
@@ -105,7 +101,7 @@ function RecipeList({ navigation }) {
     }
   };
 
-  //NEXT PAGE SHIT - need to assign recipe to this and figure out how it works with flatlist
+  //NEXT PAGE
   useEffect(() => {
     if (changingPage) {
       fetchChangePage();
@@ -140,7 +136,7 @@ function RecipeList({ navigation }) {
           </Text>
           <TextInput
             style={styles.centreSearch}
-            placeholder="..."
+            placeholder="Ingredient1 Ingredient2 ..."
             onChangeText={setTextInputValue}
             value={textInputValue}
             onSubmitEditing={handleSearch}
@@ -188,6 +184,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#729B79",
+    textAlign: "center",
   },
   boxText: {
     color: "#F5E2C8",
@@ -262,15 +259,3 @@ const styles = StyleSheet.create({
   next: { right: 10 },
 });
 export default RecipeList;
-
-// textInputValueArray = textInputValue.split(" ");
-// if (textInputValueArray.length == 1) {
-//   changeQueryText(textInputValueArray[0]);
-// } else {
-//   for (var i = 0; i < textInputValueArray.length - 1; i++) {
-//     mergingInputText += textInputValueArray[i] + "%20";
-//   }
-//   mergingInputText += textInputValueArray[i];
-//   changeQueryText(mergingInputText);
-//   setIsSearching(true);
-// }
